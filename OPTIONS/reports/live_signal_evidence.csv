@@ -1,0 +1,1 @@
+decision_time_ist,publish_time_ist,instrument_key,underlying,expiry,strike,option_type,published_entry_low,published_entry_high,published_sl,published_tp,actual_exchange_bid,actual_exchange_ask,actual_exchange_ltp,raw_parquet_file,raw_row_index,verification_status

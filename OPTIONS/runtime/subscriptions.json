@@ -1,0 +1,13 @@
+[
+  {
+    "timestamp": 1781588975.1281493,
+    "instrument_key": [
+      "NSE_INDEX|Nifty 50",
+      "NSE_FO|12345",
+      "NSE_FO|67890"
+    ],
+    "feed_mode": "full",
+    "payload": "{\"guid\": \"sub_control\", \"method\": \"sub\", \"data\": {\"mode\": \"full\", \"instrumentKeys\": [\"NSE_INDEX|Nifty 50\", \"NSE_FO|12345\", \"NSE_FO|67890\"]}}",
+    "count": 3
+  }
+]

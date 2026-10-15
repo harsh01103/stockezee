@@ -1,0 +1,25 @@
+{
+    "name": "stock-study-monorepo",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "start": "vercel dev",
+        "build": "npm --prefix app install && npm --prefix app run build"
+    },
+    "dependencies": {
+        "axios": "^1.13.5",
+        "csv-parser": "^3.0.0",
+        "dotenv": "^17.3.1",
+        "node-cache": "^5.1.2",
+        "node-fetch": "^2.7.0",
+        "rss-parser": "^3.13.0",
+        "technicalindicators": "^3.1.0",
+        "yahoo-finance2": "^2.14.0"
+    },
+    "devDependencies": {
+        "@types/node": "^18.19.130",
+        "@types/node-fetch": "^2.6.13",
+        "@vercel/node": "^5.6.12",
+        "typescript": "^5.9.3"
+    }
+}

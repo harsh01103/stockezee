@@ -1,0 +1,11 @@
+rank,contract,exec_window_sec,S1_delivery_sec,S1_remaining_sec,S1_usable,S2_delivery_sec,S2_remaining_sec,S2_usable,S3_delivery_sec,S3_remaining_sec,S3_usable,S4_delivery_sec,S4_remaining_sec,S4_usable
+1,NIFTY 23500 PE,300,210,90,True,60,240,True,15,285,True,5,295,True
+2,NIFTY 23200 PE,300,210,90,True,60,240,True,15,285,True,5,295,True
+3,NIFTY 23300 PE,300,210,90,True,60,240,True,15,285,True,5,295,True
+4,NIFTY 23700 PE,300,210,90,True,60,240,True,15,285,True,5,295,True
+5,NIFTY 23400 PE,300,210,90,True,60,240,True,15,285,True,5,295,True
+6,NIFTY 23800 PE,300,210,90,True,60,240,True,15,285,True,5,295,True
+7,NIFTY 23600 PE,300,210,90,True,60,240,True,15,285,True,5,295,True
+8,NIFTY 23550 PE,300,210,90,True,60,240,True,15,285,True,5,295,True
+9,NIFTY 23250 PE,300,210,90,True,60,240,True,15,285,True,5,295,True
+10,NIFTY 23350 PE,300,210,90,True,60,240,True,15,285,True,5,295,True

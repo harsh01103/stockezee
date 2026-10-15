@@ -1,0 +1,9 @@
+1653:         target1 = round(entry + (underlying_t1_pct * underlying_price * abs_delta), 2)
+1657:             target1 = max(target1, round(entry + min_target_move, 2))
+1664:             target1 = max(target1, round(entry + min_target_move, 2))
+1668:         target2 = round(target1 * 1.5, 2)
+1804:         "target1": target1,
+1849:     print("  Target 1:     Rs." + str(idea['target1']))
+1887:             f"🎯 Target 1: ₹{idea['target1']}\n"
+2102:         t1 = sig["target1"]
+2749:                     best_idea["stop"], best_idea["target1"]

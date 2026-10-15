@@ -1,0 +1,5 @@
+provider: upstox
+transport_version: v3
+upstox:
+  authorize_url_v2: "https://api.upstox.com/v2/feed/market-data-feed/authorize"
+  authorize_url_v3: "https://api.upstox.com/v3/feed/market-data-feed/authorize"

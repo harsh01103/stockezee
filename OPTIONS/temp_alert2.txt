@@ -1,0 +1,50 @@
+2087:         # 2. FIRE WEBHOOK (server expects {message: "<telegram text>", features: {...}})
+2088:         try:
+2089:             url = "http://localhost:4000/api/signals/webhook"
+2090:             webhook_payload = {
+2091:                 "message": msg,
+2092:                 "features": {
+2093:                     "size_multiplier": idea.get("size_multiplier", 1),
+2094:                     "confidence": idea.get("confidence", 0),
+2095:                     "regime": idea.get("regime", ""),
+2096:                     "execution_score": idea.get("execution_score", 0),
+2097:                     "timeout_seconds": idea.get("timeout_seconds", 180),
+2098:                     "quantity": idea.get("quantity", 0),
+2099:                 },
+2100:                 "model_version": idea.get("telemetry_version", ""),
+2101:                 "strategy_name": idea.get("strategy", ""),
+2102:             }
+2103:             resp = httpx.post(url, json=webhook_payload, timeout=5.0)
+2104:             if resp.status_code == 200:
+2105:                 log.info("Webhook alert sent for %s", contract)
+2106:             else:
+2107:                 log.warning("Webhook alert failed: %s", resp.text)
+2108:         except Exception as e:
+2109:             log.warning("Webhook HTTP error: %s", e)
+2110:             
+2111:     except Exception as e:
+2112:         log.warning("Alert/Execution formatting error: %s", e)
+2113: 
+2114: 
+2115: def publish_signal(idea):
+2116:     """Append trade idea to CSV and send Telegram alert."""
+2117:     OUTPUT_CSV.parent.mkdir(parents=True, exist_ok=True)
+2118:     file_exists = OUTPUT_CSV.exists()
+2119:     
+2120:     # Filter out internal fields starting with _
+2121:     csv_idea = {k: v for k, v in idea.items() if not k.startswith("_")}
+2122:     
+2123:     with open(OUTPUT_CSV, "a", newline="") as f:
+2124:         writer = csv.DictWriter(f, fieldnames=csv_idea.keys())
+2125:         if not file_exists:
+2126:             writer.writeheader()
+2127:         writer.writerow(csv_idea)
+2128:         
+2129:     # Week 3: Feature vector collection for future ML
+2130:     import json
+2131:     ml_log = Path("reports/ml_features_log.jsonl")
+2132:     ml_log.parent.mkdir(parents=True, exist_ok=True)
+2133:     with open(ml_log, "a") as f:
+2134:         # Extract features and full telemetry
+2135:         ml_data = idea.get("_features", {}).copy()
+2136:         ml_data["signal_id"] = idea.get("signal_id")

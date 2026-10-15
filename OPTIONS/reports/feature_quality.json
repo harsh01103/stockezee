@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "score": 100,
+  "total_rows": 18754,
+  "null_rate": 0.0,
+  "duplicate_rate": 0.0,
+  "missing_timestamps": 0,
+  "negative_volume": 0,
+  "reasons": []
+}

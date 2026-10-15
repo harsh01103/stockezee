@@ -1,0 +1,7 @@
+{
+  "grade": "FAIL",
+  "moving_feature_ratio": 0.0,
+  "dynamic_feature_ratio": 0.0,
+  "root_layer": "RAW",
+  "repair_target": "Recorder is capturing flat/deterministic data. Check mock data generator or websocket feed."
+}

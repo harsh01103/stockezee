@@ -1,0 +1,1 @@
+{"timestamp": "2026-10-13 15:13:36", "active_engines": "Momentum, Mean Reversion, CAS", "NIFTY": {"regime": "TRENDING_MOMENTUM", "oi_net": 5.4, "atm_strike": 22700, "ce_prem": 29.5, "pe_prem": 22.4}, "BANKNIFTY": {"regime": "CHOPPY_MEAN_REVERSION", "oi_net": 0.1, "atm_strike": 55500, "ce_prem": 716.0, "pe_prem": 544.4}}

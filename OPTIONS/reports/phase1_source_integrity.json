@@ -1,0 +1,7 @@
+{
+  "grade": "FAIL",
+  "real_source_ratio": 1.0,
+  "rows_written": 62,
+  "movement_score": 0.0,
+  "root_cause": "Insufficient rows written (websocket disconnected or no live market data)."
+}

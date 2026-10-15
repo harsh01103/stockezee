@@ -1,0 +1,8 @@
+{
+  "grade": "PASS",
+  "component_balance": true,
+  "hhi": 0.1739030909804038,
+  "effective_components": 5.86068577573631,
+  "rank_stability": 1.0,
+  "max_ablation_impact": 0.4
+}

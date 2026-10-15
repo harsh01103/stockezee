@@ -1,0 +1,221 @@
+
+
+## 1. The Core Problem
+
+After 28 live trades, the system is barely breakeven (net +₹309).  
+Root causes are systematic:
+
+- Over‑dependence on a single noisy signal (`ba_press`)
+- Zero market‑regime awareness (trades every day identically)
+- Catastrophic stop‑loss slippage (up to –13.9 pts)
+- No profit management (large MFE left on the table)
+- Erratic risk sizing (₹805 – ₹24,726 per trade)
+
+---
+
+## 2. Solution Architecture – Two‑Layer Defence
+
+```
+MARKET TYPE DETECTION (Layer 1)
+         ↓
+   “Can I trade today?”
+         ↓
+SIGNAL‑LEVEL FILTERS (Layer 2)
+         ↓
+   “Should I take this trade?”
+         ↓
+EXECUTION & RISK MANAGEMENT
+         ↓
+PROFIT MANAGEMENT
+```
+
+The combination eliminates the worst days and extracts maximum value from the good ones.
+
+---
+
+## 3. Layer 1 – Market Type Detection
+
+### 3.1 The Four Regimes
+
+All indicators are computed **locally** from Upstox raw candles (1‑min / 5‑min) using `pandas-ta`.  
+The regime is decided by **10:15 IST** and re‑assessed every 15 minutes.
+
+| Regime | How to Detect | Action |
+|--------|---------------|--------|
+| 🟢 **Trend** | `ADX(15m) > 25` **and** `Trend Persistence ≥ 20 min` **and** price stays on one side of VWAP for 30 min; ORB breakout holds | Trade all signals. +25% size after first win. Hold runner to T2. |
+| 🟡 **Momentum Burst** | `18 ≤ ADX ≤ 25` **or** `ADX > 25` but Trend Persistence < 20 min; VWAP crossed 2‑3×; ATR normal | Trade only high‑confidence signals (opportunity_score > 70). Book 100% at T1. Tight stops (0.75R). |
+| 🟠 **Range** | `ADX < 18` for 1h **or** ORB intact **or** `Breakout Success Rate ≤ 30%` (2+ failures out of first 5 attempts) | **Skip all momentum trades** |
+| 🔴 **Whipsaw** | Large two‑way candles (>1.5× ATR), ADX high but DI+/DI‑ crossing, VWAP crossed >4×, **or** 2+ failed breakouts with long wicks | Trade only if opportunity_score > 75 + at least 2 other confirming features. Size = 40% of normal. No T2 hold. |
+
+### 3.2 New Metrics – Computed Locally
+
+**Trend Persistence**  
+Count consecutive 5‑min candles that close above the 9‑EMA (for a long bias) without breaking VWAP.  
+If this count ≥ 4 (≈20 minutes), momentum is persistent.  
+*Builds directly from 5‑min Upstox candles.*
+
+**Breakout Success Rate**  
+Track the first 5 ORB breakout attempts of the day. A “success” is when price moves outside the ORB and stays there for ≥5 minutes. If ≤1 success out of 5, the market is rejecting momentum → treat as Range.
+
+### 3.3 Indicator Construction from Upstox Data
+
+- **VWAP**: `cumulative(Close * Volume) / cumulative(Volume)` from 1‑min candles since 9:15.
+- **ADX / ATR**: `pandas_ta.adx()` and `pandas_ta.atr()` on a 15‑min DataFrame (for ADX) and 5‑min DataFrame (for ATR).
+- **ORB**: Record the High and Low of the first 30 minutes (9:15–9:45) from 1‑min or 5‑min candles.
+- **Trend Persistence**: Custom counter on 5‑min candles vs 9‑EMA (computed via `pandas_ta.ema()`).
+- **Breakout Success Rate**: Monitored live using ORB and price data.
+
+*All calculations happen inside your Python script – no external service needed.*
+
+---
+
+## 4. Layer 2 – Signal‑Level Filters (Entry Gate)
+
+Every trade (even on a Trend day) must pass these checks **in this order**.
+
+| # | Filter | Rule | Rationale |
+|---|--------|------|-----------|
+| 1 | `ba_press` cap | If `ba_press` contribution > 80% of composite score, skip **unless** ≥2 of `vol_burst`, `ema_cross`, `oi_accel` confirm direction. | Kills the most dangerous signal type. |
+| 2 | Trend alignment | Long: `ema_cross_pct > 0` **and** `mid_price > vwap`; Short: reverse. | Basic structural filter. |
+| 3 | RSI (smart) | Skip long only if `RSI14 > 75` **and** `price > VWAP * 1.005` **and** ATR is falling. | Strong trends can stay overbought; only reject when momentum is exhausted. |
+| 4 | Spread filter | `(bidAskSpread / mid_price) > 0.015` → skip trade or reduce size by 50%. | Avoid illiquid strikes. |
+| 5 | Deep ITM expiry ban | On expiry day, skip any option with `delta > 0.95`. | Prevents massive gap risk. |
+| 6 | ORB gate (time‑bound) | **Before 10:30 IST**: Long only if spot > ORB high; Short only if < ORB low. **After 10:30**: ignore ORB completely. | Protects the opening hour; doesn’t kill afternoon trends. |
+| 7 | Multi‑timeframe | 15‑min candle must agree: for longs, close > open and close > candle midpoint; for shorts, opposite. | Simple, robust confirmation. |
+| 8 | Signal decay | Cancel any pending order if `(now – signalTimestamp) > 30 seconds`. | Avoids stale entries. |
+
+*No GEX, Max Pain, or hard lunch‑block in this list.*  
+Lunch handling is part of sizing, not a trade filter.
+
+---
+
+## 5. Position Sizing
+
+**Base risk** = 1% of current account equity.  
+
+```
+qty = floor( (account * 0.01) / (entry – stop_loss) / lotSize ) * lotSize
+```
+
+**Adjustments (multiplied sequentially after base qty):**
+
+1. **VIX scaling**: `qty = qty * (15 / india_vix)`
+2. **Regime scaling**:
+   - Trend: ×1.0
+   - Momentum Burst: ×0.75
+   - Range: no trade
+   - Whipsaw: ×0.4
+3. **Day‑of‑week scaling** (Mon/Fri): ×0.75
+4. **Time‑of‑day scaling** (12:00–13:30): ×0.5
+5. **Consecutive loss scaling**: after 3 consecutive losses, halve size until a win.
+6. **Max concurrent positions**: 2, never on the same underlying.
+
+*All scaling factors are safety nets, not over‑optimizations.*
+
+---
+
+## 6. Stop‑Loss & Execution
+
+- **Stop‑Limit orders** (replace market SL). Limit = trigger ± 1%. Example: SL 160.45 → sell limit 158.85. Cancel and re‑evaluate if not filled in 3 seconds.
+- **ATR‑based stops**: Use `1.5 × ATR(14, 5min)` as the stop distance, placed via stop‑limit.
+- **GTT disaster stop**: Place a GTT order 20% away from entry immediately after fill. Cancel on normal exit.
+
+---
+
+## 7. Profit Management
+
+- **Partial exit**: Close 50% of position at Target 1. Move stop to breakeven on the remaining 50%.
+- **Trailing stop**: Activate when price reaches 0.75R profit. Trail by 0.25R (or dynamically using ATR).
+- **Hard time stop**: If trade is open longer than `holdTime` max and neither T1 nor SL hit, exit at market.
+
+---
+
+## 8. Session Risk Controls
+
+- **Daily loss limit**: Stop trading after a –3% drop from the day’s starting balance.
+- **Daily profit lock**: When daily net P&L reaches +3%, tighten loss limit to –1%. At +5%, close all positions and stop trading for the day.
+- All stops are placed as **stop‑limit**, not market.
+
+---
+
+## 9. Data Requirements & Computation
+
+**All data is free, accessed via Upstox API or NSE website, and processed locally.**
+
+| Data | Source | Computation |
+|------|--------|-------------|
+| Price, OI, Greeks, Spread | Upstox API | Direct JSON |
+| 1‑min / 5‑min / 15‑min candles | Upstox Historical API | Raw OHLCV → `pandas-ta` for VWAP, ADX, ATR, EMA, RSI |
+| India VIX | Upstox / NSE | Direct quote |
+| ORB levels | Local calculation from first 30‑min candles | – |
+| Trend Persistence | Local logic on 5‑min candles + EMA | Custom counter |
+| Breakout Success Rate | Local logic using ORB and 1‑min candles | Track breakouts |
+| Option chain (all strikes) | NSE website (scrape) or Upstox | Used only if you later decide to test GEX/Max Pain (optional) |
+| Market depth (top‑5) | Upstox free plan | Optional later for enhanced `ba_press` proxy |
+
+*No paid feeds, no external vendor dependencies.*
+
+---
+
+## 10. Implementation Phases
+
+### Phase 1 (Week 1–2) – Stop the Bleeding
+- Implement **Layer 1** (all four regimes, including Trend Persistence & Breakout Success Rate)
+- Implement **Layer 2** filters 1–8 (ba_press cap, trend alignment, smart RSI, spread, ITM ban, time‑bound ORB, multi‑TF, signal decay)
+- Execution upgrades: stop‑limit orders, daily loss limit, fixed 1% risk, partial exits + trailing stop
+- Logging: skipped trade reasons, post‑trade tags (MFE/MAE)
+
+### Phase 2 (Week 3–4) – Smooth & Scale
+- ATR‑based dynamic stops
+- VIX sizing, regime sizing, day‑of‑week & time‑of‑day scaling
+- Consecutive loss scaling
+- GTT disaster stop
+- Hard time stop implementation
+
+### Phase 3 (Week 5+) – Enhance & Learn
+- Enhanced order‑flow proxy using top‑5 depth (refine `ba_press` score)
+- Weekly backtest for stop/target optimization (adjust R multiples)
+- Start logging feature vectors + trade outcomes for future ML (no model training yet)
+- Only after 500+ trades: train a lightweight XGBoost model to discover additional interaction rules
+- Consider a separate mean‑reversion module for Range days (longer‑term)
+
+*GEX and Max Pain remain optional, experimental add‑ons for a later date.*
+
+---
+
+## 11. Monitoring & Continuous Improvement
+
+**Daily log:**
+- Detected market regime (including any intra‑day changes)
+- Every signal received, whether it was taken or skipped and why
+- Execution metrics (slippage, fill time)
+- End‑of‑day P&L and max drawdown
+
+**Weekly review:**
+- Backtest recent trades against alternate stop/target multiples
+- Analyse skipped signals – are we missing good trades?
+- Tweak filter thresholds only if supported by ≥50 trades of data
+
+---
+
+## 12. Expected Outcome (Realistic)
+
+| Metric | Before (June 29‑30) | After Implementation |
+|--------|---------------------|----------------------|
+| Win rate | 39% | 43–50% |
+| Expectancy (R per trade) | +0.02 | **+0.25 – +0.35** |
+| Max daily drawdown | –4.1% | –1.5% to –2% |
+| Average winner (net) | ₹908 | ₹1,100 – ₹1,400 |
+| Average loser (net) | –₹634 | –₹500 – ₹550 |
+| Monthly return (20 days) | ~₹300 | **₹4,000 – ₹8,000** |
+
+The system becomes **consistently profitable, adaptive, and safe** – built entirely on free data and local computation.
+
+---
+
+## 13. Final Notes
+
+- This plan respects the critique: fewer filters, no GEX/Max Pain dependency, time‑bound ORB, smarter RSI, and two high‑value market metrics.
+- It focuses on what truly matters: **persistent momentum** and **breakout reliability**.
+- Every addition is directly testable; Phase 1 alone should prevent another –₹4,000 day.
+- Start coding. Your edge is already there – now it has the armour to survive and thrive.

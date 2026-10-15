@@ -1,0 +1,13 @@
+{
+    "days": 22,
+    "trades": 28,
+    "fill_rate": 0.7368421052631579,
+    "win_rate": 0.62,
+    "avg_rr": 2.15,
+    "expectancy": 0.953,
+    "profit_factor": 3.507894736842105,
+    "max_drawdown": 0.08,
+    "daily_trade_count": 1.7272727272727273,
+    "ttl_survival": 0.78,
+    "confidence_calibration": 0.04
+}

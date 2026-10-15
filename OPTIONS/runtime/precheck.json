@@ -1,0 +1,9 @@
+{
+  "env_exists": true,
+  "token_enc_exists": true,
+  "token_meta_exists": true,
+  "disk_free_gb": 268.81,
+  "disk_ok": true,
+  "network_ok": true,
+  "precheck_pass": true
+}

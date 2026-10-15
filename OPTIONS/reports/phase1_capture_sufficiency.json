@@ -1,0 +1,8 @@
+{
+  "grade": "FAIL",
+  "rows_per_minute": 692250.2385171051,
+  "instrument_utilization": 0.016129032258064516,
+  "movement_score_15m": 0.0,
+  "heartbeat_ratio": 1.0,
+  "root_cause": "Market closed during capture window (Out of hours)."
+}

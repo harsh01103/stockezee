@@ -1,0 +1,50 @@
+2037: def send_telegram_alert(idea):
+2038:     """Send instant Telegram push notification for a trade signal."""
+2039:     try:
+2040:         contract = f"{idea['underlying']} {idea['expiry']} {idea['strike']} {idea['option_type']}"
+2041:         lot = LOT_SIZE.get(idea['underlying'], 65)
+2042:         lot_cost = round(idea['entry'] * lot)
+2043:         last_seen = idea.get('last_seen_price', idea['entry'])
+2044:         max_entry = idea.get('max_entry', idea['entry'])
+2045:         
+2046:         hedge_str = ""
+2047:         if idea.get('action') == "SELL" and idea.get('hedge_strike'):
+2048:             hedge_str = f"🛡️ HEDGE LEG: Buy {idea['underlying']} {idea['expiry']} {idea['hedge_strike']} {idea['option_type']}\n"
+2049:             
+2050:         msg = (
+2051:             f"🚨 *TRADE SIGNAL*\n"
+2052:             f"━━━━━━━━━━━━━━━━━━━━━\n"
+2053:             f"📌 *{contract}*\n"
+2054:             f"{hedge_str}"
+2055:             f"📊 Direction: *{idea['direction']}*\n"
+2056:             f"⚙️ Strategy: *{idea.get('strategy', 'Momentum Breakout')}*\n"
+2057:             f"━━━━━━━━━━━━━━━━━━━━━\n"
+2058:             f"👁 Last Seen: ₹{last_seen}\n"
+2059:             f"✅ *LIMIT ORDER: ₹{idea['entry']}*\n"
+2060:             f"🚫 Don't Chase: ₹{max_entry}\n"
+2061:             f"💰 Lot Cost: ₹{lot_cost:,}\n"
+2062:             f"━━━━━━━━━━━━━━━━━━━━━\n"
+2063:             f"🛑 Stop Loss: ₹{idea['stop']}\n"
+2064:             f"🎯 Target 1: ₹{idea['target1']}\n"
+2065:             f"🎯 Target 2: ₹{idea['target2']}\n"
+2066:             f"━━━━━━━━━━━━━━━━━━━━━\n"
+2067:             f"📈 Confidence: {idea['confidence']}\n"
+2068:             f"⏰ Enter Before: {idea['entry_window_end']}\n"
+2069:             f"⏳ Hold: {idea['expected_hold_minutes']}"
+2070:         )
+2071:         
+2072:         try:
+2073:             url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+2074:             resp = httpx.post(url, json={
+2075:                 "chat_id": TELEGRAM_CHAT_ID,
+2076:                 "text": msg,
+2077:                 "parse_mode": "Markdown"
+2078:             }, timeout=5)
+2079:             
+2080:             if resp.status_code == 200:
+2081:                 log.info("Telegram alert sent for %s", contract)
+2082:             else:
+2083:                 log.warning("Telegram alert failed: %s", resp.text)
+2084:         except Exception as e:
+2085:             log.warning("Telegram HTTP error: %s", e)
+2086:             

@@ -1,0 +1,8 @@
+{
+  "grade": "PASS",
+  "overlap_60": 1.0,
+  "median_rank_shift": 0.0,
+  "expiry_concentration": 0.5,
+  "half_life": 3600.0,
+  "false_discovery_score": 0.85
+}

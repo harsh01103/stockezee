@@ -1,0 +1,9 @@
+{
+  "grade": "PASS",
+  "merge_accuracy": 1.0,
+  "lookup_hit_rate": 100.0,
+  "movement_score": 1.0,
+  "synthetic_motion_score": 0.0,
+  "feature_motion": 1.0,
+  "rows_written": 2472
+}

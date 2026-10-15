@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 30% 5%;
+    --foreground: 0 0% 98%;
+    --card: 220 25% 8%;
+    --card-foreground: 0 0% 98%;
+    --popover: 220 25% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 142 71% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 20% 12%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 220 20% 12%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 142 71% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 20% 18%;
+    --input: 220 20% 18%;
+    --ring: 142 71% 45%;
+    --radius: 0.625rem;
+    --sidebar-background: 220 25% 8%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 142 71% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 20% 12%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 220 20% 18%;
+    --sidebar-ring: 142 71% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  /* Animation utilities */
+  .animate-in {
+    animation: animateIn 0.5s ease-out forwards;
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  .slide-in-from-left-8 {
+    animation: slideInFromLeft 0.7s ease-out forwards;
+  }
+  
+  .slide-in-from-right-8 {
+    animation: slideInFromRight 0.7s ease-out forwards;
+  }
+  
+  .slide-in-from-bottom-4 {
+    animation: slideInFromBottom 0.5s ease-out forwards;
+  }
+
+  /* Custom scrollbar */
+  .custom-scrollbar::-webkit-scrollbar,
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track,
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #0f1629;
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb,
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+}
+
+@keyframes animateIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

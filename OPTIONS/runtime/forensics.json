@@ -1,0 +1,84 @@
+{
+  "outbound": [
+    {
+      "exp": "A: minimal (Nifty 50)",
+      "timestamp": 1781590433.6810362,
+      "opcode": "BINARY (0x2)",
+      "length": 102,
+      "payload": {
+        "guid": "sub_A",
+        "method": "sub",
+        "data": {
+          "mode": "full",
+          "instrumentKeys": [
+            "NSE_INDEX|Nifty 50"
+          ]
+        }
+      }
+    },
+    {
+      "exp": "B: single option",
+      "timestamp": 1781590449.2501295,
+      "opcode": "BINARY (0x2)",
+      "length": 96,
+      "payload": {
+        "guid": "sub_B",
+        "method": "sub",
+        "data": {
+          "mode": "full",
+          "instrumentKeys": [
+            "NSE_FO|75288"
+          ]
+        }
+      }
+    },
+    {
+      "exp": "C: minimal payload",
+      "timestamp": 1781590464.8150616,
+      "opcode": "BINARY (0x2)",
+      "length": 86,
+      "payload": {
+        "guid": "sub_C",
+        "method": "sub",
+        "data": {
+          "instrumentKeys": [
+            "NSE_INDEX|Nifty 50"
+          ]
+        }
+      }
+    },
+    {
+      "exp": "D1: mode ltpc",
+      "timestamp": 1781590480.342241,
+      "opcode": "BINARY (0x2)",
+      "length": 103,
+      "payload": {
+        "guid": "sub_D1",
+        "method": "sub",
+        "data": {
+          "mode": "ltpc",
+          "instrumentKeys": [
+            "NSE_INDEX|Nifty 50"
+          ]
+        }
+      }
+    },
+    {
+      "exp": "D2: mode option_chain",
+      "timestamp": 1781590495.8825037,
+      "opcode": "BINARY (0x2)",
+      "length": 111,
+      "payload": {
+        "guid": "sub_D2",
+        "method": "sub",
+        "data": {
+          "mode": "option_chain",
+          "instrumentKeys": [
+            "NSE_INDEX|Nifty 50"
+          ]
+        }
+      }
+    }
+  ],
+  "inbound": []
+}

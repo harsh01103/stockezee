@@ -1,0 +1,9 @@
+{
+    "rows": 67996,
+    "payload_identity_rate": 1.0,
+    "decoder_identity_rate": 0.998,
+    "storage_identity_rate": 0.998,
+    "unknown_ratio": 0.002,
+    "zero_strike_ratio": 0.002,
+    "expiry_fill_ratio": 0.998
+}

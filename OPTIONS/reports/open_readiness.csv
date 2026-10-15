@@ -1,0 +1,8 @@
+module,status,real_source,optional,blocking,notes
+AUTH,PASS,Upstox API,false,false,Token valid
+STORAGE,PASS,Local Disk,false,false,Parquet healthy
+FEATURES,PASS,Upstox derived,false,false,Schema clean
+RESEARCH,PASS,Features,false,false,Builders import
+SIGNALS,PASS,Scorer,false,false,Connected
+CONTEXT,UNAVAILABLE,External APIs,true,false,Non-core context missing
+PUBLISHER,PASS,Memory,false,false,Dry init

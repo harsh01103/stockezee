@@ -1,0 +1,9 @@
+{
+  "grade": "FAIL",
+  "rows_written": 38302,
+  "movement_score": 0.0,
+  "feature_motion": 0.058823529411764705,
+  "real_source_ratio": 1.0,
+  "pipeline_conversion": 1.0,
+  "root_cause": "Not enough unique instruments captured."
+}

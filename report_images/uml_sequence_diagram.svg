@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 680" width="1000" height="680">
+  <defs>
+    <linearGradient id="seqBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <filter id="shadowSeq">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="680" rx="12" fill="url(#seqBg)"/>
+  
+  <!-- Title -->
+  <text x="500" y="32" text-anchor="middle" fill="#ffffff" font-family="'Segoe UI', sans-serif" font-size="17" font-weight="bold">UML SEQUENCE DIAGRAM — HIGH-FREQUENCY ORDER EXECUTION LIFECYCLE</text>
+  <text x="500" y="50" text-anchor="middle" fill="#94a3b8" font-family="'Segoe UI', sans-serif" font-size="11">Time-Ordered Synchronous and Asynchronous Messages across Subsystem Lifelines</text>
+
+  <!-- Lifeline Headers -->
+  <!-- 1. Market Feed -->
+  <rect x="30" y="70" width="100" height="35" rx="5" fill="#1e293b" stroke="#38bdf8" filter="url(#shadowSeq)"/>
+  <text x="80" y="92" text-anchor="middle" fill="#38bdf8" font-family="'Consolas', monospace" font-size="11" font-weight="bold">Market Feed</text>
+  <line x1="80" y1="105" x2="80" y2="650" stroke="#334155" stroke-dasharray="4"/>
+
+  <!-- 2. Ingestion Engine -->
+  <rect x="180" y="70" width="110" height="35" rx="5" fill="#1e293b" stroke="#10b981" filter="url(#shadowSeq)"/>
+  <text x="235" y="92" text-anchor="middle" fill="#10b981" font-family="'Consolas', monospace" font-size="11" font-weight="bold">Ingestion (Py)</text>
+  <line x1="235" y1="105" x2="235" y2="650" stroke="#334155" stroke-dasharray="4"/>
+
+  <!-- 3. Greeks &amp; Quant Solver -->
+  <rect x="340" y="70" width="120" height="35" rx="5" fill="#1e293b" stroke="#f59e0b" filter="url(#shadowSeq)"/>
+  <text x="400" y="92" text-anchor="middle" fill="#f59e0b" font-family="'Consolas', monospace" font-size="11" font-weight="bold">Numba Solver</text>
+  <line x1="400" y1="105" x2="400" y2="650" stroke="#334155" stroke-dasharray="4"/>
+
+  <!-- 4. Adversarial ML Gate -->
+  <rect x="510" y="70" width="110" height="35" rx="5" fill="#1e293b" stroke="#c026d3" filter="url(#shadowSeq)"/>
+  <text x="565" y="92" text-anchor="middle" fill="#c026d3" font-family="'Consolas', monospace" font-size="11" font-weight="bold">ML Gate (R/Py)</text>
+  <line x1="565" y1="105" x2="565" y2="650" stroke="#334155" stroke-dasharray="4"/>
+
+  <!-- 5. Kelly Risk Engine -->
+  <rect x="670" y="70" width="100" height="35" rx="5" fill="#1e293b" stroke="#ef4444" filter="url(#shadowSeq)"/>
+  <text x="720" y="92" text-anchor="middle" fill="#ef4444" font-family="'Consolas', monospace" font-size="11" font-weight="bold">Kelly Risk</text>
+  <line x1="720" y1="105" x2="720" y2="650" stroke="#334155" stroke-dasharray="4"/>
+
+  <!-- 6. Express / Supabase / Telegram -->
+  <rect x="820" y="70" width="130" height="35" rx="5" fill="#1e293b" stroke="#38bdf8" filter="url(#shadowSeq)"/>
+  <text x="885" y="92" text-anchor="middle" fill="#38bdf8" font-family="'Consolas', monospace" font-size="11" font-weight="bold">Execution/DB</text>
+  <line x1="885" y1="105" x2="885" y2="650" stroke="#334155" stroke-dasharray="4"/>
+
+  <!-- Sequence Messages -->
+  <!-- 1. Market -> Ingestion -->
+  <line x1="80" y1="130" x2="235" y2="130" stroke="#38bdf8" stroke-width="2"/>
+  <polygon points="230,126 238,130 230,134" fill="#38bdf8"/>
+  <text x="100" y="122" fill="#cbd5e1" font-family="'Consolas', monospace" font-size="10.5">1: Binary Protobuf Tick (UDP 5005)</text>
+
+  <!-- 2. Ingestion latency check -->
+  <rect x="230" y="145" width="10" height="30" fill="#10b981"/>
+  <text x="250" y="165" fill="#94a3b8" font-family="'Consolas', monospace" font-size="10">2: Verify transit latency (&lt;800ms)</text>
+
+  <!-- 3. Ingestion -> Numba Solver -->
+  <line x1="235" y1="195" x2="400" y2="195" stroke="#10b981" stroke-width="2"/>
+  <polygon points="395,191 403,195 395,199" fill="#10b981"/>
+  <text x="250" y="187" fill="#cbd5e1" font-family="'Consolas', monospace" font-size="10.5">3: compute_greeks(S, K, IV, tau)</text>
+
+  <!-- 4. Numba execution self-call -->
+  <rect x="395" y="210" width="10" height="40" fill="#f59e0b"/>
+  <text x="415" y="235" fill="#fcd34d" font-family="'Consolas', monospace" font-size="10">4: JIT: Gamma Singularity + Vanna</text>
+
+  <!-- 5. Solver -> Ingestion return -->
+  <line x1="400" y1="265" x2="235" y2="265" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3"/>
+  <polygon points="242,261 234,265 242,269" fill="#f59e0b"/>
+  <text x="260" y="258" fill="#cbd5e1" font-family="'Consolas', monospace" font-size="10.5">5: return GreeksVector</text>
+
+  <!-- 6. Ingestion -> ML Gate -->
+  <line x1="235" y1="295" x2="565" y2="295" stroke="#38bdf8" stroke-width="2"/>
+  <polygon points="560,291 568,295 560,299" fill="#38bdf8"/>
+  <text x="310" y="287" fill="#cbd5e1" font-family="'Consolas', monospace" font-size="10.5">6: evaluate_candidate(features: x_t)</text>
+
+  <!-- 7. ML Gate self-audit -->
+  <rect x="560" y="310" width="10" height="55" fill="#c026d3"/>
+  <text x="580" y="330" fill="#e879f9" font-family="'Consolas', monospace" font-size="10">7a: Test Friction Hurdle (STT + spread)</text>
+  <text x="580" y="350" fill="#e879f9" font-family="'Consolas', monospace" font-size="10">7b: RF / Probit Win-Prob (&gt;= 0.50)</text>
+
+  <!-- 8. ML Gate -> Kelly Risk -->
+  <line x1="565" y1="380" x2="720" y2="380" stroke="#c026d3" stroke-width="2"/>
+  <polygon points="715,376 723,380 715,384" fill="#c026d3"/>
+  <text x="585" y="372" fill="#cbd5e1" font-family="'Consolas', monospace" font-size="10.5">8: APPROVED =&gt; request_sizing()</text>
+
+  <!-- 9. Kelly Risk self-calc -->
+  <rect x="715" y="395" width="10" height="40" fill="#ef4444"/>
+  <text x="735" y="420" fill="#fca5a5" font-family="'Consolas', monospace" font-size="10">9: Scale Kelly Budget (Base/Half/Qtr)</text>
+
+  <!-- 10. Kelly Risk -> Execution -->
+  <line x1="720" y1="450" x2="885" y2="450" stroke="#ef4444" stroke-width="2"/>
+  <polygon points="880,446 888,450 880,454" fill="#ef4444"/>
+  <text x="740" y="442" fill="#cbd5e1" font-family="'Consolas', monospace" font-size="10.5">10: POST /webhook (OrderPayload)</text>
+
+  <!-- 11. Execution self-routing -->
+  <rect x="880" y="465" width="10" height="90" fill="#38bdf8"/>
+  <text x="730" y="485" fill="#38bdf8" font-family="'Consolas', monospace" font-size="10">11a: Upstox Order Transmit &amp; Fill</text>
+  <text x="730" y="505" fill="#10b981" font-family="'Consolas', monospace" font-size="10">11b: Insert row into Supabase DB</text>
+  <text x="730" y="525" fill="#facc15" font-family="'Consolas', monospace" font-size="10">11c: Broadcast Telegram Fill Alert</text>
+  <text x="730" y="545" fill="#f472b6" font-family="'Consolas', monospace" font-size="10">11d: Push WebSocket to React UI</text>
+
+  <!-- 12. Execution Return ACK -->
+  <line x1="885" y1="580" x2="235" y2="580" stroke="#10b981" stroke-width="2" stroke-dasharray="3"/>
+  <polygon points="242,576 234,580 242,584" fill="#10b981"/>
+  <text x="440" y="572" fill="#a7f3d0" font-family="'Consolas', monospace" font-size="10.5">12: ExecutionConfirmed(status: 200 OK)</text>
+
+  <!-- 13. Update Local Position State -->
+  <rect x="230" y="595" width="10" height="30" fill="#10b981"/>
+  <text x="250" y="615" fill="#94a3b8" font-family="'Consolas', monospace" font-size="10">13: Arm dynamic trailing stop (TRAIL_3)</text>
+</svg>

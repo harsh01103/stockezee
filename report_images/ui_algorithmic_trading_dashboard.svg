@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" width="1000" height="640">
+  <defs>
+    <linearGradient id="uiBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f19"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <filter id="shadowUi">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="640" rx="10" fill="url(#uiBg)"/>
+  
+  <!-- Browser Header Bar -->
+  <rect width="1000" height="42" rx="10" fill="#1f2937"/>
+  <circle cx="22" cy="21" r="5.5" fill="#ef4444"/>
+  <circle cx="38" cy="21" r="5.5" fill="#f59e0b"/>
+  <circle cx="54" cy="21" r="5.5" fill="#10b981"/>
+  <rect x="250" y="10" width="500" height="22" rx="5" fill="#111827"/>
+  <text x="500" y="25" text-anchor="middle" fill="#9ca3af" font-family="'Consolas', monospace" font-size="11">https://stock-study-monorepo.vercel.app/options/nifty-live</text>
+
+  <!-- App Top Navigation -->
+  <rect y="42" width="1000" height="50" fill="#0f172a" stroke="#1e293b"/>
+  <text x="25" y="73" fill="#38bdf8" font-family="'Segoe UI', sans-serif" font-size="16" font-weight="bold">QUANT-OPTIONS-AI</text>
+  <text x="200" y="72" fill="#e2e8f0" font-family="'Segoe UI', sans-serif" font-size="12">Dashboard</text>
+  <text x="290" y="72" fill="#38bdf8" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="bold">Live Options Chain</text>
+  <text x="430" y="72" fill="#e2e8f0" font-family="'Segoe UI', sans-serif" font-size="12">ML Screener (VCP)</text>
+  <text x="570" y="72" fill="#e2e8f0" font-family="'Segoe UI', sans-serif" font-size="12">Historical Replay</text>
+  <text x="700" y="72" fill="#e2e8f0" font-family="'Segoe UI', sans-serif" font-size="12">DocIntel News</text>
+
+  <!-- Regime & Status Pill -->
+  <rect x="830" y="54" width="145" height="26" rx="13" fill="#065f46" stroke="#10b981"/>
+  <circle cx="845" cy="67" r="4" fill="#34d399"/>
+  <text x="895" y="71" text-anchor="middle" fill="#ecfdf5" font-family="'Segoe UI', sans-serif" font-size="11" font-weight="bold">REGIME: TRENDING</text>
+
+  <!-- Metric KPI Cards -->
+  <!-- Card 1 -->
+  <rect x="25" y="105" width="220" height="75" rx="8" fill="#1e293b" stroke="#334155" filter="url(#shadowUi)"/>
+  <text x="40" y="128" fill="#94a3b8" font-family="'Segoe UI', sans-serif" font-size="11">NIFTY 50 SPOT INDEX</text>
+  <text x="40" y="156" fill="#f8fafc" font-family="'Consolas', monospace" font-size="20" font-weight="bold">24,382.40</text>
+  <text x="160" y="156" fill="#10b981" font-family="'Consolas', monospace" font-size="13" font-weight="bold">+148.20 (+0.61%)</text>
+
+  <!-- Card 2 -->
+  <rect x="265" y="105" width="225" height="75" rx="8" fill="#1e293b" stroke="#334155" filter="url(#shadowUi)"/>
+  <text x="280" y="128" fill="#94a3b8" font-family="'Segoe UI', sans-serif" font-size="11">TODAY REALIZED NET P&amp;L</text>
+  <text x="280" y="156" fill="#10b981" font-family="'Consolas', monospace" font-size="20" font-weight="bold">+₹14,850.00</text>
+  <text x="430" y="156" fill="#38bdf8" font-family="'Consolas', monospace" font-size="11">8 / 8 Wins (100%)</text>
+
+  <!-- Card 3 -->
+  <rect x="510" y="105" width="225" height="75" rx="8" fill="#1e293b" stroke="#334155" filter="url(#shadowUi)"/>
+  <text x="525" y="128" fill="#94a3b8" font-family="'Segoe UI', sans-serif" font-size="11">ORDERBOOK VWOIM Z-SCORE</text>
+  <text x="525" y="156" fill="#38bdf8" font-family="'Consolas', monospace" font-size="20" font-weight="bold">+3.84σ</text>
+  <text x="635" y="156" fill="#facc15" font-family="'Segoe UI', sans-serif" font-size="11">Ask Queue Absorption</text>
+
+  <!-- Card 4 -->
+  <rect x="755" y="105" width="220" height="75" rx="8" fill="#1e293b" stroke="#334155" filter="url(#shadowUi)"/>
+  <text x="770" y="128" fill="#94a3b8" font-family="'Segoe UI', sans-serif" font-size="11">ML GATE APPROVAL RATE</text>
+  <text x="770" y="156" fill="#e879f9" font-family="'Consolas', monospace" font-size="20" font-weight="bold">54.2%</text>
+  <text x="850" y="156" fill="#f43f5e" font-family="'Segoe UI', sans-serif" font-size="11">43 Rejected (Friction)</text>
+
+  <!-- Main Options Chain Table Panel -->
+  <rect x="25" y="195" width="670" height="425" rx="8" fill="#0f172a" stroke="#1e293b" filter="url(#shadowUi)"/>
+  <rect x="25" y="195" width="670" height="35" rx="8" fill="#1e293b"/>
+  <text x="40" y="218" fill="#ffffff" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="bold">REAL-TIME 62-STRIKE OPTIONS CHAIN WITH BLACK-SCHOLES GREEKS &amp; VANNA SKEW</text>
+
+  <!-- Table Headers -->
+  <g font-family="'Consolas', monospace" font-size="10.5" fill="#94a3b8">
+    <text x="40" y="250">CALL BID</text>
+    <text x="100" y="250">CALL ASK</text>
+    <text x="160" y="250">DELTA</text>
+    <text x="215" y="250">GAMMA</text>
+    <text x="270" y="250">VANNA</text>
+    <text x="330" y="250" fill="#facc15" font-weight="bold">STRIKE</text>
+    <text x="390" y="250">PUT BID</text>
+    <text x="450" y="250">PUT ASK</text>
+    <text x="510" y="250">DELTA</text>
+    <text x="565" y="250">OI FLOW</text>
+    <text x="630" y="250">ACTION</text>
+  </g>
+  <line x1="35" y1="260" x2="685" y2="260" stroke="#334155"/>
+
+  <!-- Row 1: 24300 CE (ITM) -->
+  <g font-family="'Consolas', monospace" font-size="11" fill="#e2e8f0">
+    <text x="40" y="285">132.40</text>
+    <text x="100" y="285">132.80</text>
+    <text x="160" y="285" fill="#38bdf8">0.68</text>
+    <text x="215" y="285">0.0031</text>
+    <text x="270" y="285">+0.014</text>
+    <text x="330" y="285" fill="#facc15" font-weight="bold">24300</text>
+    <text x="390" y="285">48.10</text>
+    <text x="450" y="285">48.35</text>
+    <text x="510" y="285" fill="#f43f5e">-0.32</text>
+    <text x="565" y="285">+12.4k</text>
+    <text x="630" y="285" fill="#64748b">HOLD</text>
+  </g>
+
+  <!-- Row 2: 24350 CE -->
+  <g font-family="'Consolas', monospace" font-size="11" fill="#e2e8f0">
+    <text x="40" y="315">98.20</text>
+    <text x="100" y="315">98.50</text>
+    <text x="160" y="315" fill="#38bdf8">0.58</text>
+    <text x="215" y="315">0.0042</text>
+    <text x="270" y="315">+0.018</text>
+    <text x="330" y="315" fill="#facc15" font-weight="bold">24350</text>
+    <text x="390" y="315">64.20</text>
+    <text x="450" y="315">64.50</text>
+    <text x="510" y="315" fill="#f43f5e">-0.42</text>
+    <text x="565" y="315">+45.1k</text>
+    <text x="630" y="315" fill="#64748b">HOLD</text>
+  </g>
+
+  <!-- Row 3: 24400 CE (ATM - SIGNAL TRIGGERED!) -->
+  <rect x="35" y="328" width="650" height="32" rx="4" fill="#14532d" stroke="#22c55e" stroke-width="1.5"/>
+  <g font-family="'Consolas', monospace" font-size="11" fill="#f0fdf4" font-weight="bold">
+    <text x="40" y="348">68.10</text>
+    <text x="100" y="348">68.30</text>
+    <text x="160" y="348" fill="#67e8f9">0.51</text>
+    <text x="215" y="348">0.0058</text>
+    <text x="270" y="348" fill="#fef08a">+0.024</text>
+    <text x="330" y="348" fill="#facc15">24400</text>
+    <text x="390" y="348">84.10</text>
+    <text x="450" y="348">84.40</text>
+    <text x="510" y="348" fill="#fca5a5">-0.49</text>
+    <text x="565" y="348">+89.2k</text>
+    <text x="625" y="348" fill="#4ade80">BUY CE</text>
+  </g>
+
+  <!-- Row 4: 24450 CE -->
+  <g font-family="'Consolas', monospace" font-size="11" fill="#e2e8f0">
+    <text x="40" y="380">44.50</text>
+    <text x="100" y="380">44.80</text>
+    <text x="160" y="380" fill="#38bdf8">0.42</text>
+    <text x="215" y="380">0.0041</text>
+    <text x="270" y="380">+0.016</text>
+    <text x="330" y="380" fill="#facc15" font-weight="bold">24450</text>
+    <text x="390" y="380">110.20</text>
+    <text x="450" y="380">110.60</text>
+    <text x="510" y="380" fill="#f43f5e">-0.58</text>
+    <text x="565" y="380">+18.0k</text>
+    <text x="630" y="380" fill="#64748b">HOLD</text>
+  </g>
+
+  <!-- Row 5: 24500 CE -->
+  <g font-family="'Consolas', monospace" font-size="11" fill="#e2e8f0">
+    <text x="40" y="410">26.10</text>
+    <text x="100" y="410">26.35</text>
+    <text x="160" y="410" fill="#38bdf8">0.31</text>
+    <text x="215" y="410">0.0028</text>
+    <text x="270" y="410">+0.011</text>
+    <text x="330" y="410" fill="#facc15" font-weight="bold">24500</text>
+    <text x="390" y="410">142.10</text>
+    <text x="450" y="410">142.50</text>
+    <text x="510" y="410" fill="#f43f5e">-0.69</text>
+    <text x="565" y="410">+31.5k</text>
+    <text x="630" y="410" fill="#64748b">HOLD</text>
+  </g>
+
+  <!-- Side Panel: Live Trade & Telegram Feed -->
+  <rect x="710" y="195" width="265" height="425" rx="8" fill="#0f172a" stroke="#1e293b" filter="url(#shadowUi)"/>
+  <rect x="710" y="195" width="265" height="35" rx="8" fill="#1e293b"/>
+  <text x="725" y="218" fill="#38bdf8" font-family="'Segoe UI', sans-serif" font-size="12" font-weight="bold">TELEGRAM &amp; BOT EXECUTION FEED</text>
+
+  <!-- Telegram Message Card 1 -->
+  <rect x="722" y="245" width="240" height="110" rx="6" fill="#1e293b" stroke="#10b981"/>
+  <text x="735" y="267" fill="#4ade80" font-family="'Segoe UI', sans-serif" font-size="11" font-weight="bold">⚡ TRADE FILLED: NIFTY 24400 CE</text>
+  <text x="735" y="286" fill="#e2e8f0" font-family="'Consolas', monospace" font-size="10.5">Price: ₹68.30 | Lots: 2 (50 Qty)</text>
+  <text x="735" y="303" fill="#e2e8f0" font-family="'Consolas', monospace" font-size="10.5">Delta: 0.51 | Gamma: 0.0058</text>
+  <text x="735" y="320" fill="#facc15" font-family="'Consolas', monospace" font-size="10.5">Kelly Allocation: ₹3,415.00</text>
+  <text x="735" y="337" fill="#38bdf8" font-family="'Consolas', monospace" font-size="10.5">Trail: 0.40% | Net Win Rate: 100%</text>
+
+  <!-- Telegram Message Card 2 (Rejection) -->
+  <rect x="722" y="370" width="240" height="110" rx="6" fill="#1e293b" stroke="#f43f5e"/>
+  <text x="735" y="392" fill="#fb7185" font-family="'Segoe UI', sans-serif" font-size="11" font-weight="bold">🛡️ ADVERSARIAL GATE REJECTION</text>
+  <text x="735" y="411" fill="#e2e8f0" font-family="'Consolas', monospace" font-size="10.5">Contract: BANKNIFTY 52000 PE</text>
+  <text x="735" y="428" fill="#fca5a5" font-family="'Consolas', monospace" font-size="10.5">Spread Drag: ₹1.40 (exceeds 0.22)</text>
+  <text x="735" y="445" fill="#fca5a5" font-family="'Consolas', monospace" font-size="10.5">Expected Net Return: -0.18</text>
+  <text x="735" y="462" fill="#94a3b8" font-family="'Consolas', monospace" font-size="10.5">Reason: Statutory STT &amp; slippage</text>
+
+  <!-- System Health Status -->
+  <rect x="722" y="495" width="240" height="110" rx="6" fill="#020617" stroke="#334155"/>
+  <text x="735" y="517" fill="#38bdf8" font-family="'Segoe UI', sans-serif" font-size="11" font-weight="bold">ENGINE STATUS &amp; REPOSITORY</text>
+  <text x="735" y="536" fill="#cbd5e1" font-family="'Consolas', monospace" font-size="10">UDP Loopback: Active (5005)</text>
+  <text x="735" y="553" fill="#cbd5e1" font-family="'Consolas', monospace" font-size="10">Transit Latency: 340ms (Normal)</text>
+  <text x="735" y="570" fill="#a7f3d0" font-family="'Consolas', monospace" font-size="10">Supabase DB: Connected</text>
+  <text x="735" y="587" fill="#facc15" font-family="'Consolas', monospace" font-size="10">GitHub: StockStudy/OptionsEngine</text>
+</svg>

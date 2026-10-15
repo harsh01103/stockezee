@@ -1,0 +1,17 @@
+{
+  "grade": "PASS",
+  "root_layer": "decoder_partial_merge",
+  "field_loss_matrix": {
+    "spot": "LOST",
+    "ltp": "PRESERVED",
+    "bid": "PRESERVED",
+    "ask": "PRESERVED",
+    "volume": "PRESERVED",
+    "oi": "PRESERVED"
+  },
+  "lookup_hit_rate": 100.0,
+  "movement_score": 0.8333333333333334,
+  "feature_motion": 1.0,
+  "unique_instruments": 60,
+  "rows_written": 2088
+}

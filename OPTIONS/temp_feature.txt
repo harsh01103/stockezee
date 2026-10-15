@@ -1,0 +1,160 @@
+            tp_mult_2 = 2.0
+        elif current_regime == "PANIC_BEAR":
+            sl_pct = 0.12   # 12% stop for panic
+            tp_mult_1 = 2.0
+            tp_mult_2 = 3.0
+        else:
+            sl_pct = 0.10   # 10% stop for trending
+            tp_mult_1 = 2.0
+            tp_mult_2 = 3.5
+        
+        stop_dist = round(entry * sl_pct, 2)
+        log.info("FALLBACK_STOPLOSS: %s %s %s | SL_dist=%.2f (%.1f%% of entry) | No ATR data",
+                 underlying, strike_val, option_type, stop_dist, sl_pct * 100)
+    
+    # Clamp: Stop distance must be between 10% and 30% of premium to avoid noise stop-outs
+    min_stop = round(entry * 0.10, 2)
+    max_stop = round(entry * 0.30, 2)
+    stop_dist = max(min_stop, min(stop_dist, max_stop))
+    
+    if action == "BUY":
+        direction = "LONG_CE" if option_type == "CE" else "LONG_PE"
+        stop = round(entry - stop_dist, 2)
+        # Trail activation: when profit reaches 1.5x the risk taken
+        trail_trigger = round(entry + stop_dist * 1.5, 2)
+    else:
+        direction = "SHORT_CE" if option_type == "CE" else "SHORT_PE"
+        stop = round(entry + stop_dist, 2)
+        trail_trigger = round(entry - stop_dist * 1.5, 2)
+        
+    target1 = round(entry + stop_dist * tp_mult_1, 2) if action == "BUY" else 0.05
+    target2 = round(entry + stop_dist * tp_mult_2, 2) if action == "BUY" else 0.05
+    risk_per_lot = stop_dist * lot
+
+    stop = max(round(entry * 0.10, 2), stop)
+    
+    # FIX #13: Proper Fractional Kelly Criterion for position sizing
+    # f* = (p * b - q) / b  where p=win_rate, b=avg_win/avg_loss, q=1-p
+    # We use HALF Kelly (industry standard for safety) and floor at 0.1
+    global consecutive_losses
+    
+    closed_signals = [s for s in all_signals if s.get("status") == "CLOSED"]
+    wins = [s for s in closed_signals if (s.get("pnl_pct", 0) or 0) > 0]
+    losses = [s for s in closed_signals if (s.get("pnl_pct", 0) or 0) < 0]
+    
+    if len(wins) >= 2 and len(losses) >= 2:
+        p = len(wins) / len(closed_signals)
+        avg_win = sum(abs(s.get("pnl_pct", 0) or 0) for s in wins) / len(wins)
+        avg_loss = sum(abs(s.get("pnl_pct", 0) or 0) for s in losses) / len(losses)
+        b = avg_win / (avg_loss + 1e-8)  # payoff ratio
+        q = 1 - p
+        kelly_f = max(0.0, (p * b - q) / (b + 1e-8))
+        # FIX: Hard-cap Kelly at 0.15 to avoid small sample blowups
+        kelly_multiplier = max(0.10, min(0.15, kelly_f * 0.5))
+        log.info("KELLY: p=%.2f b=%.2f f*=%.3f hard_cap_kelly=%.3f", p, b, kelly_f, kelly_multiplier)
+    else:
+        # Insufficient data — use conservative quarter Kelly (capped)
+        kelly_multiplier = 0.15
+        # Reduce further on consecutive losses
+        if consecutive_losses == 1:
+            kelly_multiplier = 0.10
+        elif consecutive_losses >= 2:
+            kelly_multiplier = 0.05
+    
+    base_risk_cap = MAX_BUDGET  # Unified risk cap scales against total trading capital
+        
+    risk_cap = int(base_risk_cap * kelly_multiplier)
+    
+    if risk_per_lot <= 0:
+        log.warning("build_trade_idea silently dropped %s %s %s: risk_per_lot <= 0", underlying, strike, option_type)
+        return None
+        
+    # ── FIX: QUANTITY SCALED TO STOP_DIST ──
+    # If the natural stop is `stop_dist`, how many lots can we buy to exactly risk `SCALP_STOP_RS`?
+    max_qty_by_risk = int(SCALP_STOP_RS / stop_dist)
+    max_lots_by_risk = max_qty_by_risk // lot
+    
+    # Also bounded by budget and kelly risk cap
+    max_lots = min(max_lots_by_risk, int(risk_cap / risk_per_lot), int(MAX_BUDGET / (entry * lot)))
+    
+    # Liquidity & Expiry guard: Hard cap lots to prevent illiquid huge sizing
+    max_lots_limit = 5 if is_expiry_day else 10
+    max_lots = min(max_lots, max_lots_limit)
+    
+    if max_lots < 1:
+        log.warning("build_trade_idea dropped %s %s %s: Stop too wide (%.2f) to afford 1 lot under ₹%d risk limit.", 
+                    underlying, strike_val, option_type, stop_dist, SCALP_STOP_RS)
+        return None
+        
+    quantity = max_lots * lot
+    
+    # ── HARD SCALPING LOGIC INTEGRATION ──
+    # Set targets based on absolute scalp target
+    target_points = SCALP_TARGET_RS / quantity
+    
+    # Override target
+    if action == "BUY":
+        target1 = round(entry + target_points, 2)
+    else:
+        target1 = round(entry - target_points, 2)
+    
+    log.info("QUANTITY_SIZED: %s %s %s | Risk_Cap=₹%d | Stop_Dist=%.2f | Lots=%d | Target_Pts=%.2f",
+             underlying, strike_val, option_type, SCALP_STOP_RS, stop_dist, max_lots, target_points)
+    
+    # ── TELEMETRY-DRIVEN PENALTIES (Removed as per PLAN_MERGED) ──
+    size_mult = 1.0
+    effective_confidence = confidence
+    
+    # Trail target: Trail strictly to Breakeven + Slippage (+0.5 points) to protect capital
+    if action == "BUY":
+        trail_target_price = round(entry + 0.5, 2)
+    else:
+        trail_target_price = round(entry - 0.5, 2)
+    
+    # Time-bound fields
+    win_start, win_end, win_sec = compute_entry_window(confidence, gen_dt)
+    expected_hold = compute_expected_hold(exit_style)
+    
+    gen_str = gen_dt.strftime("%Y-%m-%d %H:%M:%S")
+    win_start_str = win_start.strftime("%H:%M:%S")
+    win_end_str = win_end.strftime("%H:%M:%S")
+    invalid_after_str = win_end.strftime("%H:%M:%S")
+    
+    # Extract all numeric indicator features from the scored row
+    _skip_keys = {"underlying", "expiry", "strike", "option_type", "ltp", "bid",
+                  "ask", "volume", "timestamp", "confidence"}
+    feature_dict = {}
+    for k, v in row.items():
+        if k in _skip_keys:
+            continue
+        if isinstance(v, (int, float)) and v == v:  # skip NaN
+            feature_dict[k] = round(float(v), 6)
+    
+    # ── Feature Contribution Decomposition (v2.2 telemetry) ──────
+    # Maps each scoring signal to its weighted contribution
+    # so future analysis can answer: "which feature drove this trade?"
+    feature_contributions = {}
+    for signal_name, weight in SCORE_WEIGHTS.items():
+        raw_val = row.get(signal_name, 0) or 0
+        if isinstance(raw_val, (int, float)) and raw_val == raw_val:
+            contribution = round(float(raw_val) * weight, 6)
+            # Use human-readable names (strip s_ prefix)
+            readable = signal_name.replace("s_", "")
+            feature_contributions[readable] = contribution
+    
+    # Dominant feature = highest absolute contribution
+    dominant_feature = ""
+    if feature_contributions:
+        dominant_feature = max(feature_contributions, key=lambda k: abs(feature_contributions[k]))
+    
+    # Generate unique signal ID to close ML loop later
+    signal_id = str(uuid.uuid4())
+    
+    return {
+        "signal_id": signal_id,
+        "record_id": row.get("record_id", ""),
+        "generated_at": gen_str,
+        "telemetry_version": TELEMETRY_VERSION,
+        "underlying": row.get("underlying", ""),
+        "expiry": str(row.get("expiry", "")),
+        "strike": row.get("strike", 0),

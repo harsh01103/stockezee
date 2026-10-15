@@ -1,0 +1,28 @@
+{
+    "name": "stock-server",
+    "version": "1.0.0",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "node index.js"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.107.0",
+        "axios": "^1.7.2",
+        "bullmq": "^6.3.3",
+        "cors": "^2.8.5",
+        "csv-parser": "^3.0.0",
+        "dotenv": "^16.4.5",
+        "express": "^4.19.2",
+        "ioredis": "^6.0.0",
+        "ml-regression-multivariate-linear": "^2.0.4",
+        "node-cache": "^5.1.2",
+        "node-fetch": "^3.3.2",
+        "rss-parser": "^3.13.0",
+        "simple-statistics": "^7.11.0",
+        "technicalindicators": "^3.1.0",
+        "ws": "^8.21.0",
+        "yahoo-finance2": "^4.0.2"
+    }
+}

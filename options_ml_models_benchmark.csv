@@ -1,0 +1,7 @@
+Model,Accuracy,Kappa,Sensitivity,Specificity,Precision,Balanced_Accuracy
+Logistic Regression,98.94,0.9782,100,97.5,98.18,98.75
+Support Vector Machine (RBF),97.87,0.9568,96.3,100,100,98.15
+Random Forest (100 Trees),96.81,0.9354,94.44,100,100,97.22
+Linear Discriminant Analysis,96.81,0.9345,98.15,95,96.36,96.57
+Naive Bayes,94.68,0.8923,92.59,97.5,98.04,95.05
+Decision Tree (CART),89.36,0.7838,88.89,90,92.31,89.44

@@ -1,0 +1,9 @@
+{
+  "passed": false,
+  "avg_ic": NaN,
+  "stability": 0.0,
+  "train_val_drift": NaN,
+  "reasons": [
+    "stability < 0.60 (0.00)"
+  ]
+}

@@ -1,0 +1,29 @@
+78: # ── Telegram Alerts ───────────────────────────────────────────
+79: TELEGRAM_BOT_TOKEN = "8801890087:AAEEICbN0GvLSj4ZTnUPSESNcIusPvXJYPs"
+80: TELEGRAM_CHAT_ID = "5661148030"
+1553: def send_telegram_alert(idea):
+1554: """Send instant Telegram push notification for a trade signal."""
+1589: url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+1591: "chat_id": TELEGRAM_CHAT_ID,
+1597: log.info("Telegram alert sent for %s", contract)
+1599: log.warning("Telegram alert failed: %s", resp.text)
+1601: log.warning("Telegram HTTP error: %s", e)
+1603: # 2. FIRE NATIVE ASYNC PYTHON EXECUTION (Replacing Node.js Webhook)
+1638: """Append trade idea to CSV and send Telegram alert."""
+1684: # Send instant Telegram push notification
+1685: send_telegram_alert(idea)
+1956: def send_telegram_message(text):
+1957: """Send a plain text Telegram message."""
+1959: url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+1961: "chat_id": TELEGRAM_CHAT_ID,
+1966: log.info("Telegram message sent")
+1968: log.warning("Telegram message error: %s", e)
+2037: send_telegram_message(
+2054: from market.macro_sentiment import fetch_macro_data, format_macro_telegram_alert
+2059: # Send macro report to Telegram
+2060: macro_msg = format_macro_telegram_alert(macro_cached_data)
+2061: send_telegram_message(macro_msg)
+2095: send_telegram_message("🔴 *SYSTEM KILLED* via Panic Switch.")
+2112: macro_msg = format_macro_telegram_alert(macro_cached_data)
+2113: send_telegram_message(macro_msg)
+2125: send_telegram_message(

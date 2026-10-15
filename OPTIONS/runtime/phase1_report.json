@@ -1,0 +1,107 @@
+{
+  "grade": "PASS",
+  "transport_readiness": 100,
+  "decode_readiness": 99,
+  "storage_readiness": 100,
+  "message_loss": 1,
+  "rows_captured": 2077,
+  "provider": {
+    "connection_time_ms": 1887.71,
+    "provider_connected": true,
+    "transport_version": "v3",
+    "authorize_status": "OK",
+    "ws_connected": true
+  },
+  "subscriptions": {
+    "sent": 62,
+    "ack": 0,
+    "top_10_keys": [
+      "NSE_FO|75283",
+      "NSE_FO|56300",
+      "NSE_FO|56301",
+      "NSE_FO|75413",
+      "NSE_FO|56304",
+      "NSE_FO|56356",
+      "NSE_FO|75276",
+      "NSE_FO|56293",
+      "NSE_FO|56354",
+      "NSE_FO|56283"
+    ]
+  },
+  "ingress": {
+    "frames_received": 388,
+    "market_frames": 387,
+    "heartbeat_frames": 1,
+    "messages_received": 388
+  },
+  "decoder": {
+    "attempts": 388,
+    "success": 387,
+    "fail": 0,
+    "rows_extracted": 2077
+  },
+  "timeline": [
+    {
+      "t": 15,
+      "provider_connected": true,
+      "subs": 62,
+      "frames": 87,
+      "market": 86,
+      "heartbeat": 1,
+      "decode_ok": 86,
+      "rows": 489,
+      "validator_recv": 489,
+      "validator_drop": 0,
+      "buffer": 489,
+      "rows_written_virtual": 335,
+      "flush_count": 1
+    },
+    {
+      "t": 30,
+      "provider_connected": true,
+      "subs": 62,
+      "frames": 187,
+      "market": 186,
+      "heartbeat": 1,
+      "decode_ok": 186,
+      "rows": 1032,
+      "validator_recv": 1032,
+      "validator_drop": 0,
+      "buffer": 1032,
+      "rows_written_virtual": 1036,
+      "flush_count": 2
+    },
+    {
+      "t": 45,
+      "provider_connected": true,
+      "subs": 62,
+      "frames": 287,
+      "market": 286,
+      "heartbeat": 1,
+      "decode_ok": 286,
+      "rows": 1576,
+      "validator_recv": 1576,
+      "validator_drop": 0,
+      "buffer": 1576,
+      "rows_written_virtual": 3516,
+      "flush_count": 4
+    },
+    {
+      "t": 60,
+      "provider_connected": true,
+      "subs": 62,
+      "frames": 387,
+      "market": 386,
+      "heartbeat": 1,
+      "decode_ok": 386,
+      "rows": 2074,
+      "validator_recv": 2074,
+      "validator_drop": 0,
+      "buffer": 2074,
+      "rows_written_virtual": 5296,
+      "flush_count": 5
+    }
+  ],
+  "blocker": null,
+  "root_cause": null
+}

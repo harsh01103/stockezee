@@ -1,0 +1,73 @@
+48: MAX_RISK_PER_TRADE = 750       # Fix A: Hard Rs. cap on max loss per trade
+51: STOP_FLOOR_PCT = 0.95          # Fix B: Stop-loss floor at -5% of entry (was 0.88 = -12%)
+52: TRAIL_TRIGGER_TRENDING = 1.02  # Fix C: Trail activation at +2% (was 1.05 = +5%)
+53: TRAIL_TRIGGER_CHOPPY = 1.015   # Fix C: Trail activation at +1.5% for choppy (was 1.03 = +3%)
+806:         # Get the highest and lowest spot price in the trailing window per underlying
+1215:     if exit_style == "TRAIL_2":
+1217:     elif exit_style == "TRAIL_3":
+1346:     # MEAN REVERSION BYPASS: If is_trending is False, we are micro-scalping chop, so skip trend checks!
+1348:         # Micro-scalps MUST be at the very edge of the range to be safe.
+1579:     # Cost-aware stop and targets (based on ENTRY, not stale price)
+1619:         underlying_stop_pct = 0.0020 * iv_scale  # ~50 point Nifty risk
+1621:         exit_style = "TRAIL_3"
+1623:         # CHOPPY: Quick micro-scalps for safety
+1624:         underlying_stop_pct = 0.0015 * iv_scale  # ~35 point Nifty risk
+1626:         exit_style = "TRAIL_2"
+1629:         underlying_stop_pct *= 1.5  # Widen leash for gamma whipsaws
+1639:         stop = round(entry - (underlying_stop_pct * underlying_price * abs_delta), 2)
+1640:         # MASTER FIX B: Tightened stop-loss floor from -12% to -5%
+1642:         # New: entry * STOP_FLOOR_PCT (0.95) caps at -5% = manageable risk
+1643:         stop = max(stop, round(entry * STOP_FLOOR_PCT, 2))
+1646:         # Regardless of percentage, no single trade can lose more than MAX_RISK_PER_TRADE Rs.
+1647:         max_point_loss = MAX_RISK_PER_TRADE / lot
+1648:         dollar_stop = round(entry - max_point_loss, 2)
+1649:         stop = max(stop, dollar_stop)
+1650:         log.info("MASTER_FIX_STOP: entry=%.2f pct_stop=%.2f dollar_stop=%.2f final_stop=%.2f max_loss_rs=%.0f",
+1651:                  entry, round(entry * STOP_FLOOR_PCT, 2), dollar_stop, stop, (entry - stop) * lot)
+1658:             # MASTER FIX C: Trail activation at +2% instead of +5%
+1659:             # Old: entry * 1.05 meant trail never activated on small winners
+1660:             # New: entry * TRAIL_TRIGGER_TRENDING (1.02) locks breakeven fast
+1661:             trail_trigger = round(entry * TRAIL_TRIGGER_TRENDING, 2)
+1663:             # Micro-scalps only require broker cost coverage
+1665:             # MASTER FIX C: Trail activation at +1.5% for choppy
+1666:             trail_trigger = round(entry * TRAIL_TRIGGER_CHOPPY, 2)
+1669:         risk_per_lot = (entry - stop) * lot
+1672:     stop = max(0.05, stop)
+1730:     # Trail target: Trail to -0.5R instead of breakeven (half risk)
+1732:         half_risk = (entry - stop) / 2
+1733:         trail_target_price = round(entry - half_risk, 2)
+1735:         half_risk = (stop - entry) / 2
+1736:         trail_target_price = round(entry + half_risk, 2)
+1799:         "stop": stop,
+1800:         "stop_type": exit_style,
+1801:         "trail_trigger": trail_trigger,
+1802:         "trail_target_price": trail_target_price,
+1826:         "stop_limit_price": round(stop * 1.01, 2) if action == "SELL" else round(stop * 0.99, 2)
+1848:     print("  Stop Loss:    Rs." + str(idea['stop']) + " (" + str(idea['stop_type']) + ")")
+1886:             f"🛑 Stop Loss: ₹{idea['stop']}\n"
+1919:                 "trail_trigger"
+1982:         ml_data["stop_loss"] = idea.get("stop")
+2101:         stop = sig["stop"]
+2119:             # Trailing stop: track peak (or trough for short)
+2131:             # Trail activation using dynamic trigger
+2132:             trail_stop = stop
+2133:             trail_trigger = sig.get("trail_trigger", trigger_price * 1.03 if action == "BUY" else trigger_price * 0.97)
+2136:                 if peak >= trail_trigger:
+2137:                     # MASTER FIX C (part 2): Once trail activates, lock at breakeven
+2138:                     # Old: base_trail = trigger_price - half_risk (gave back half the stop distance)
+2139:                     # New: base_trail = trigger_price (breakeven protection)
+2140:                     base_trail = trigger_price  # Breakeven floor
+2141:                     # MASTER FIX C (part 3): Trail at 3% from peak instead of 5%
+2142:                     trail_stop = max(stop, base_trail, peak * 0.97)
+2144:                 if peak <= trail_trigger:
+2145:                     half_risk = (stop - trigger_price) / 2
+2146:                     base_trail = trigger_price + half_risk
+2147:                     trail_stop = min(stop, base_trail, peak * 1.05)
+2159:             is_stopped = (ltp <= trail_stop) if action == "BUY" else (ltp >= trail_stop)
+2162:             # Hit stop
+2163:             if is_stopped:
+2170:                 log.info("CLOSED (stop): %s %s %s @ Rs.%.2f pnl=%.2f%%",
+2449:                 "Scanner stopped. See you tomorrow! 👋"
+2745:                     "PUBLISHED: %s %s %s %s | conf=%.4f exec_score=%.4f entry=%.2f stop=%.2f t1=%.2f",
+2749:                     best_idea["stop"], best_idea["target1"]
+2833:         print("STOP")

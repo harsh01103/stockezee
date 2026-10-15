@@ -1,0 +1,8 @@
+{
+  "grade": "FAIL",
+  "identity_score": 1.0,
+  "lookup_hit_rate": 79.10851360781577,
+  "unique_instruments": 60,
+  "movement_score": 0.0,
+  "root_cause": "Movement score too low (0.00 <= 0.40)."
+}

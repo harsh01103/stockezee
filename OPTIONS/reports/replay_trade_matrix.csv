@@ -1,0 +1,1 @@
+trade_id,decision_ts,fill_ts,exit_ts,underlying,expiry,strike,option_type,entry_low,entry_high,actual_fill,actual_exit,fill_tick_timestamp,exit_tick_timestamp,raw_source_file,raw_row_number

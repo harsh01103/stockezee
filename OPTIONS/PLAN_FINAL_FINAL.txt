@@ -1,0 +1,184 @@
+
+
+## 1. The Core Idea
+
+A **hierarchical decision tree** replaces the long filter list:
+
+```
+Market Regime (intelligent)
+      ↓
+Strategy (momentum OR range)
+      ↓
+Original Signal (trusted)
+      ↓
+Sanity checks (only 3–4)
+      ↓
+Trade
+```
+
+The regime detector does the heavy lifting.  
+Once it says *“this is a good momentum environment”*, the original momentum signal is trusted almost as‑is.
+
+---
+
+## 2. System Architecture (Layered & Clean)
+
+```
+Market Data Layer
+      ↓
+Indicator Engine (ADX, VWAP, ORB, etc.)
+      ↓
+Regime Detector (with confidence)
+      ↓
+Strategy Selector
+      ↓
+┌──────────┴──────────┐
+▼                      ▼
+Momentum Strategy    Range Strategy
+(original signal)    (mean‑reversion)
+      │                    │
+      └──────────┬─────────┘
+                 ▼
+          Execution Engine
+                 │
+                 ▼
+          Risk Manager
+                 │
+                 ▼
+          Logger / Analytics
+```
+
+---
+
+## 3. System Health Monitor
+
+**Before any trade:** verify:
+
+- WebSocket connected & ticks fresh (<3s)
+- Candle data complete
+- Broker API healthy
+- Clock synced
+- Greeks available
+- Positions reconciled
+
+If any check fails → **SAFE MODE** (no new orders, manage existing).
+
+---
+
+## 4. Regime Detector (The Brain)
+
+### 4.1 Evaluation Cadence
+
+- Indicators update every minute.
+- Regime recalculated **only on 5‑minute candle close**.
+- A switch requires **2 consecutive 5‑min evaluations** of the same new regime.
+
+### 4.2 Four Regimes
+
+| Regime | Conditions (all required unless noted) |
+|--------|----------------------------------------|
+| 🟢 **Trend** | ADX(15m) > 25, Trend Persistence ≥ 20 min (EMA9 slope > 0), VWAP uncrossed for 30 min, Breakout Success (last 5) ≥ 60% |
+| 🟡 **Momentum Burst** | ADX ≥ 18, Breakout Success > 50%, VWAP crosses 2‑3/hr. (Also used if ADX>25 but persistence <20 min) |
+| 🟠 **Range** | At least 2 of: ADX<18, VWAP crosses >3/hr, Breakout Success ≤30% |
+| 🔴 **Whipsaw** | Everything else (high ADX with DI+/‑ crossing, failed breakouts, low confidence) |
+
+**Expiry override:** after 14:00 → Trend→Momentum Burst; Range→Whipsaw.
+
+### 4.3 Regime Confidence (Simple)
+
+A single percentage (0–100%) derived from the four key metrics equally weighted (ADX strength, persistence, breakout success, VWAP behaviour).  
+**Only one threshold matters:**
+
+- **Confidence ≥ 70%** → trade the corresponding strategy.
+- **Confidence < 70%** → no new trades.
+
+---
+
+## 5. Signal Handling & Strike Selection
+
+- **One position per underlying at a time.**
+- Multiple signals within 60s → pick the best strike via a short **Selection Score** (confidence, liquidity, delta, spread).
+- Only strikes with **0.25 ≤ |delta| ≤ 0.85** are eligible.
+- Max 2 concurrent positions, different underlyings. Portfolio heat ≤ ₹2,000.
+
+---
+
+## 6. Strategy A – Momentum (Trend / Momentum Burst)
+
+### 6.1 Entry Rules (Minimal & Clean)
+
+The original momentum signal is taken directly, subject **only** to these sanity checks:
+
+1. **Trend alignment** – Longs: `ema_cross_pct > 0` AND `mid_price > vwap`. Shorts: opposite.
+2. **Spread check** – `(spread / mid_price) ≤ 0.015`.
+3. **Risk check** – `(entry – stop) × lotSize ≤ ₹1,500`. If wider, skip (do not adjust the stop).
+4. **Signal freshness** – Cancel if signal older than 30 seconds.
+5. **Deep ITM expiry ban** – Skip if delta >0.95 on expiry day.
+
+That’s it. No RSI, no multi‑timeframe candle, no ORB gate after 10:30.
+
+**Why so few?**  
+Because the regime detector has already confirmed we’re in a momentum‑friendly environment. The original signal already embeds volume, OI, price action – we don’t need to re‑filter everything.
+
+### 6.2 Execution & Profit Management
+
+- **Entry:** Limit order at signal’s limit price, 60s validity.
+- **Stop‑loss:** Stop‑limit order; limit = trigger ± 1%. Retry once, then marketable limit.
+- **Trailing stop:** Activates at 0.75R profit, trails by 0.25R (updated every minute).
+- **Hard time stop:** `min(12 min, 3 × avg winning hold time)`.
+- **GTT disaster stop:** 20% away immediately.
+- **No partial exits** (1 lot).
+
+---
+
+## 7. Strategy B – Mean‑Reversion (Range Regime)
+
+Active only when regime = **Range** and confidence ≥ 70%.
+
+### 7.1 Entry Triggers
+
+**Long fade:**  
+Spot ≤ ORB Low × 1.002, RSI(5m) < 30, price below VWAP by >0.3%, 5‑min candle has a bullish rejection wick (lower shadow ≥2× body, close > open).  
+**Short fade:** opposite at ORB High.
+
+**Volume filter:** current 5‑min volume < 1.2 × average (otherwise possible breakout).
+
+### 7.2 Option Selection
+
+Choose ATM/slightly OTM option (|delta| 0.3–0.5) with tight spread.
+
+### 7.3 Exit & Sizing
+
+- **Target:** Return to VWAP → exit 100%.
+- **Stop:** Just beyond ORB boundary (0.2% buffer).
+- **Time stop:** 20 min.
+- **Risk cap:** `(stop distance × lotSize) ≤ ₹750`, else skip.
+
+---
+
+## 8. Safety Mode (Whipsaw)
+
+- **No new trades.**
+- Existing positions managed normally.
+
+---
+
+## 9. Global Risk Controls
+
+- **Daily loss limit:** –3% of account (₹3,000) → stop for day.
+- **Profit lock:** at +3% → move loss limit to –1%; at +5% → close all, halt.
+- **Portfolio heat:** ≤ ₹2,000 total.
+- **Consecutive losses:** After 3, only signals with original confidence >0.65 until a win.
+
+---
+
+## 10. Logging & Improvement
+
+Log: timestamp, symbol, regime, confidence, skip reason (if any), trade outcome, MFE/MAE, hold time, **regime before trade** and **regime after exit**.
+
+**Weekly review:**  
+For each regime, calculate Win rate, Profit Factor, Avg R.  
+Use this data to **validate** the regime detector, not to add filters prematurely.
+
+---
+

@@ -1,0 +1,12 @@
+polars
+httpx
+websocket-client
+pyarrow
+asyncio
+pydantic
+loguru
+python-dotenv
+cryptography
+cachetools
+protobuf
+grpcio-tools

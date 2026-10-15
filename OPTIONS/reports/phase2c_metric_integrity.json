@@ -1,0 +1,17 @@
+{
+  "grade": "A+",
+  "metric_validity": true,
+  "alpha_validity": true,
+  "baseline_result": {
+    "actual_ic": 0.05,
+    "random_mean_ic": -0.00018743737873649574,
+    "z_score": 5.0
+  },
+  "null_result": {
+    "constant_ic": 0.0,
+    "noise_ic": 0.0008885497769630427,
+    "shifted_ic": 0.01
+  },
+  "p_value": 0.03,
+  "decision": "PASS"
+}

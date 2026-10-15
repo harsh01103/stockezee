@@ -1,0 +1,222 @@
+## 1. The Core Problem
+
+After 28 live trades, the original momentum‑only system was barely breakeven (+₹309).  
+Root causes:
+
+- Trades every day identically, even when momentum is absent.
+- Over‑dependence on a single noisy signal (`ba_press`).
+- Brutal stop‑loss slippage (up to –13.9 pts).
+- No profit management.
+- Erratic risk sizing.
+
+**The system only works on Trend / Momentum‑Burst days. On Range or Whipsaw days it destroys capital.**  
+The solution is twofold:  
+1. A real‑time regime detector that knows exactly what kind of market we are in.  
+2. A second strategy for mean‑reverting Range days, and a safety mode for Whipsaw days.
+
+---
+
+## 2. System Architecture
+
+```
+Every 15 minutes (starting at 10:15 IST)
+        │
+        ▼
+MARKET TYPE DETECTOR
+(ADX, Trend Persistence, Breakout Success Rate, VWAP crossings)
+        │
+        ├── REGIME = TREND ──────────► Activate Strategy A: Momentum Breakout
+        │
+        ├── REGIME = MOMENTUM BURST ─► Activate Strategy A with reduced aggression
+        │
+        ├── REGIME = RANGE ──────────► Activate Strategy B: Mean‑Reversion (Fade Extremes)
+        │
+        └── REGIME = WHIPSAW ────────► Activate Safety Mode (no trades, or 0.4× size only if extreme confidence)
+```
+
+The detector runs continuously. If the regime changes during the day, the active strategy switches automatically.
+
+---
+
+## 3. Market Type Detection (The Brain)
+
+All indicators are computed locally from Upstox raw candles (1‑min, 5‑min, 15‑min) using `pandas‑ta`.  
+Detection runs at **10:15 IST** and then every **15 minutes** thereafter.
+
+### 3.1 Key Metrics
+
+| Metric | Calculation | Purpose |
+|--------|-------------|---------|
+| **ADX(15)** | `pandas_ta.adx(high, low, close, length=14)` on 15‑min candles | Strength of trend (direction agnostic) |
+| **Trend Persistence** | Count of consecutive 5‑min candles closing above 9‑EMA (for longs) without crossing VWAP. If ≥4 candles (≈20 min), momentum is persistent. | Filters out choppy ADX >25 |
+| **Breakout Success Rate** | Track first 5 ORB breakout attempts. Success = price moves outside ORB and stays there ≥5 min. If ≤1 success → momentum is failing. | Direct measure of breakout reliability |
+| **VWAP Cross Counter** | Count how many times price crossed VWAP in last 1 hour. | High crosses → range / whipsaw |
+| **ATR(14, 5min)** | `pandas_ta.atr()` on 5‑min candles | Volatility context |
+| **ORB (Opening Range)** | High and Low of 9:15–9:45 IST from 1‑min candles | Range boundaries |
+
+### 3.2 Regime Decision Tree
+
+```
+IF ADX > 25
+    AND Trend Persistence ≥ 20 min
+    AND VWAP uncrossed for 30 min
+    → 🟢 TREND
+
+ELSE IF ADX ≥ 18 (or ADX >25 but Trend Persistence <20 min)
+    AND VWAP crossed 2‑3 times in last hour
+    → 🟡 MOMENTUM BURST
+
+ELSE IF ADX < 18 for 1 hour
+    OR (Breakout Success Rate ≤ 30% AND ORB intact)
+    OR VWAP crossed >3 times and ATR not expanding
+    → 🟠 RANGE
+
+ELSE
+    → 🔴 WHIPSAW (high ADX but DI+/DI- crossing, large two‑way candles, or 2+ failed breakouts with long wicks)
+```
+
+**Note:** On **expiry day**, after 14:00 IST, automatically downgrade Trend → Momentum Burst and Range → Whipsaw (due to late‑day volatility spikes).
+
+---
+
+## 4. Strategy A – Momentum Breakout (For Trend & Momentum Burst Regimes)
+
+This is the refined version of your original system, now with all improvements.
+
+### 4.1 Entry Filters (applied in order)
+
+| # | Filter | Rule |
+|---|--------|------|
+| 1 | `ba_press` cap | Skip if `ba_press` contribution >80% unless ≥2 of `vol_burst`, `ema_cross`, `oi_accel` confirm direction. |
+| 2 | Trend alignment | Long: `ema_cross_pct > 0` **and** `mid_price > vwap`; Short: reverse. |
+| 3 | Smart RSI | Skip long only if RSI14 > 75 **and** price > VWAP×1.005 **and** ATR falling. |
+| 4 | Spread filter | Skip if `(bidAskSpread / mid_price) > 0.015`. |
+| 5 | Deep ITM expiry ban | Skip if `delta > 0.95` on expiry day. |
+| 6 | ORB gate (time‑bound) | Before 10:30: long only if spot > ORB high; short only if < ORB low. After 10:30: ignore ORB. |
+| 7 | Multi‑TF confirmation | 15‑min candle must agree (close > open for long). |
+| 8 | Signal decay | Cancel pending order if `(now – signal_timestamp) > 30s`. |
+
+### 4.2 Position Sizing (Strategy A)
+
+Base risk = 1% of account.  
+`qty = floor( (account * 0.01) / (entry – stop_loss) / lotSize ) * lotSize`
+
+Multipliers (applied sequentially):
+- VIX: `× (15 / india_vix)`
+- Regime: Trend ×1.0, Momentum Burst ×0.75
+- Day of week: Mon/Fri ×0.75
+- Time of day: 12:00–13:30 ×0.5
+- After 3 consecutive losses: ×0.5 until a win.
+
+Max 2 concurrent positions, never same underlying.
+
+### 4.3 Execution & Profit Management
+
+- **Stop‑limit orders**: SL‑Limit with limit 1% beyond trigger. Cancel if unfilled in 3 sec.
+- **ATR‑based stops**: `1.5 × ATR(14, 5min)` distance.
+- **GTT disaster stop**: 20% away placed immediately.
+- **Partial exit**: 50% at T1, move SL to breakeven on remainder.
+- **Trailing stop**: Activate at 0.75R profit, trail by 0.25R (or ATR).
+- **Hard time stop**: Exit if open > `holdTime` max.
+
+---
+
+## 5. Strategy B – Mean‑Reversion (For Range Regime)
+
+This strategy is only active when the market is confirmed as Range.
+
+### 5.1 Core Idea
+
+Fade the extremes of the Opening Range. When price touches the top of the range (ORB High) and shows exhaustion, sell (or buy a Put). When it touches the bottom (ORB Low) and shows exhaustion, buy (or buy a Call).
+
+### 5.2 Entry Rules
+
+| Component | Long (Buy) | Short (Sell) |
+|-----------|------------|--------------|
+| Trigger | Price ≤ ORB Low × 1.002 (within 0.2%) | Price ≥ ORB High × 0.998 (within 0.2%) |
+| RSI | RSI14 < 30 | RSI14 > 70 |
+| VWAP extension | `VWAP / price – 1 > 0.3%` (price below VWAP) | `price / VWAP – 1 > 0.3%` (price above VWAP) |
+| Order type | Limit order at ORB Low (or slightly above) | Limit order at ORB High (or slightly below) |
+| Time gate | Only after 10:30 AM (let range establish) | Same |
+
+All conditions must be met. If price breaks through the ORB boundary by more than 0.3%, the signal is invalidated (the range may be breaking).
+
+### 5.3 Exit Rules
+
+| Component | Rule |
+|-----------|------|
+| Target | Return to VWAP (or fixed 0.6R reward) |
+| Stop‑Loss | Beyond the range boundary: `ORB High + 0.2%` (for shorts), `ORB Low – 0.2%` (for longs) |
+| Time Stop | Exit if trade open > 20 min without hitting target or stop |
+| Partial exit | 50% at VWAP, rest at the opposite ORB boundary (if it reaches) |
+
+### 5.4 Sizing & Risk (Strategy B)
+
+- Risk per trade = **5 to 10%** of account (lower than momentum, because win rate is higher but R‑multiples are smaller).
+- Max 1 position at a time (no concurrent positions in range mode).
+- Same stop‑limit, ATR‑stop, and GTT disaster stop rules apply.
+
+---
+
+## 6. Safety Mode – Whipsaw Handling
+
+When the regime is **Whipsaw**, the market is too erratic for either strategy.  
+**Default action:** No new trades.  
+Optional: If you must trade, only take extremely high‑confidence signals (opportunity_score > 75 and at least 3 features confirming) at **40% of normal size** for momentum, or **20% size** for mean‑reversion. But the recommended professional approach is to **stay flat**.
+
+---
+
+## 7. Unified Risk Management
+
+These rules apply globally, regardless of which strategy is active.
+
+- **Daily loss limit**: Stop trading after –3% of day’s starting balance.
+- **Daily profit lock**: At +3%, move loss limit to –1%. At +5%, close all and stop for the day.
+- **Consecutive loss scaling**: After 3 losses in a row, reduce size by 50% until a win.
+- **All exits via stop‑limit**, never market orders.
+- **GTT disaster stop** on every position.
+
+---
+
+## 8. Data Requirements & Computation (All Free)
+
+| Data | Source | Usage |
+|------|--------|-------|
+| Real‑time prices, OI, Greeks, spread | Upstox API | Both strategies |
+| 1‑min / 5‑min / 15‑min candles | Upstox Historical API | Indicator calculation (VWAP, ADX, ATR, EMA, ORB) |
+| India VIX | Upstox / NSE | Sizing |
+| Option chain (optional) | NSE website | Not required for core strategies; may be used later for GEX/MaxPain experiments |
+| Market depth top‑5 | Upstox free plan | Enhanced order‑flow proxy (future) |
+
+**All computations are local**, using `pandas-ta` and custom logic. No external services required.
+
+---
+
+## 9. Implementation Phases
+
+### Phase 1 (Week 1–2): Robust Momentum System
+- Market type detector (all four regimes).
+- Strategy A with all entry filters, sizing, execution, profit management.
+- Daily loss limit, stop‑limit orders.
+- Logging of skipped trades and post‑trade metrics.
+
+### Phase 2 (Week 3–4): Add Range Strategy
+- Implement Strategy B (mean‑reversion) with entry/exit logic.
+- Integrate with regime detector (regime = Range → activate Strategy B).
+- Backtest Strategy B on historical Range days.
+- Paper trade Strategy B for 2 weeks.
+
+### Phase 3 (Week 5–6): Refinements & Automation
+- ATR‑based dynamic stops for both strategies.
+- VIX, time‑of‑day, day‑of‑week scaling.
+- Consecutive loss scaling, GTT disaster stop.
+- Real‑time equity curve monitoring (profit lock).
+
+### Phase 4 (Ongoing)
+- Enhanced order‑flow proxy (top‑5 depth) to improve `ba_press`.
+- Weekly backtest for stop/target optimization.
+- Log feature vectors for future ML (no model training until 500+ trades).
+- Economic calendar integration (optional).
+
+---
+

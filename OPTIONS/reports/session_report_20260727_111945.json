@@ -1,0 +1,20 @@
+{
+  "session_id": "20260727_111945",
+  "metrics": {
+    "total_received": 698007,
+    "total_dropped": 0,
+    "packet_loss_pct": 0.0,
+    "latency_p95_ms": 6461.127001953125,
+    "reconnect_count": 7,
+    "token_refresh_count": 0
+  },
+  "drop_reasons": {
+    "duplicate": 0,
+    "negative_value": 0,
+    "missing_timestamp": 0,
+    "bid_gt_ask": 0
+  },
+  "warning_reasons": {
+    "oi_reset": 0
+  }
+}

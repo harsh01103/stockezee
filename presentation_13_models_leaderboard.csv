@@ -1,0 +1,15 @@
+Model_ID,Category,Architecture,Accuracy,Kappa,Sensitivity,Specificity,Precision,F1_Score,Balanced_Accuracy
+2,Linear/GLM,Probit Regression,100,1,100,100,100,100,100
+8,Kernel SVM,SVM (Linear Hyperplane),100,1,100,100,100,100,100
+14,Neural Net,Multi-Layer Perceptron (ANN),98.94,0.9783,98.15,100,100,99.07,99.07
+1,Linear/GLM,Logistic Regression (Logit),98.94,0.9782,100,97.5,98.18,99.08,98.75
+10,Kernel SVM,SVM (Radial Basis Function - RBF),97.87,0.9568,96.3,100,100,98.11,98.15
+13,Ensembles,Random Forest (100 Trees),96.81,0.9354,94.44,100,100,97.14,97.22
+6,Instance-Based,K-Nearest Neighbors (k=11),96.81,0.9349,96.3,97.5,98.11,97.2,96.9
+3,Discriminant,Linear Discriminant Analysis (LDA),96.81,0.9345,98.15,95,96.36,97.25,96.57
+4,Discriminant,Quadratic Discriminant Analysis (QDA),95.74,0.9135,94.44,97.5,98.08,96.23,95.97
+9,Kernel SVM,SVM (Polynomial Kernel - d=3),95.74,0.9135,94.44,97.5,98.08,96.23,95.97
+7,Probabilistic,Naive Bayes Classifier,94.68,0.8923,92.59,97.5,98.04,95.24,95.05
+5,Instance-Based,K-Nearest Neighbors (k=5),93.62,0.8711,90.74,97.5,98,94.23,94.12
+12,Ensembles,Bagged Classification Trees,93.62,0.8711,90.74,97.5,98,94.23,94.12
+11,Decision Trees,CART Decision Tree,89.36,0.7838,88.89,90,92.31,90.57,89.44

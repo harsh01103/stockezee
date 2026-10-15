@@ -1,0 +1,8 @@
+{
+  "grade": "FAIL",
+  "movement_score": 0.0,
+  "real_source_ratio": 0.0,
+  "pipeline_conversion": 1.0,
+  "root_cause": "MOCK",
+  "repair_target": "Recorder is injecting synthetic data via Mock Generator instead of real WebSocket frames."
+}

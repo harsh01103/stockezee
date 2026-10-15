@@ -1,0 +1,128 @@
+
+## 1. The Core Problem
+
+After 28 live trades, the system is barely breakeven.  
+The single biggest reason: **it trades every day the same way, even when there’s no momentum to capture.**
+
+- June 29 (a choppy, range‑bound Monday) killed –₹4,068 with an 80% loss rate.
+- June 30 (expiry trend day) recovered +₹4,378 with a 50% win rate.
+
+**The system only works on Trend / Momentum‑Burst days.  
+On all other days, it should not trade — and now it won’t.**
+
+---
+
+## 2. The Two‑Layer Solution
+
+```
+MARKET TYPE DETECTION (Layer 1)
+         ↓
+  "Is momentum working today?"
+         ↓
+  YES → Trade with confidence
+  NO  → Skip the session entirely
+         ↓
+SIGNAL‑LEVEL FILTERS (Layer 2)
+         ↓
+EXECUTION & RISK MANAGEMENT
+         ↓
+PROFIT MANAGEMENT
+```
+
+---
+
+## 3. Layer 1 – Market Type Detection (The Gatekeeper)
+
+*All indicators computed locally from Upstox raw candles via `pandas-ta`.  
+Decision by 10:15 IST, re‑assessed every 15 minutes.*
+
+| Regime | Detection | Action |
+|--------|-----------|--------|
+| 🟢 **Trend** | ADX(15m) > 25 **and** Trend Persistence ≥ 20 min **and** VWAP uncrossed for 30 min; ORB breakout holds | Full size, +25% after first win, hold runner to T2 |
+| 🟡 **Momentum Burst** | 18 ≤ ADX ≤ 25 **or** ADX > 25 but Trend Persistence < 20 min; VWAP crossed 2‑3× | Trade only high‑confidence signals. Book 100% at T1. Tight stops. |
+| 🟠 **Range** | ADX < 18 for 1h **or** ORB intact **or** Breakout Success Rate ≤ 30% | **🚫 No momentum trades allowed.** |
+| 🔴 **Whipsaw** | Large two‑way candles, ADX high but DI+/DI‑ crossing, VWAP crossed >4×, 2+ failed breakouts | **🚫 No momentum trades allowed** (or drastically reduced: 0.4× size, only if confidence > 75 + 2 confirmers) |
+
+**On Range and Whipsaw days, the system simply does not trade.**  
+This isn’t a failure — it’s the smartest possible action. Avoiding a –4% day is mathematically identical to making +4%.
+
+---
+
+## 4. Layer 2 – Entry Filters (Only on Trade‑Allowed Days)
+
+| Filter | Rule |
+|--------|------|
+| `ba_press` cap | Skip if contribution > 80% unless 2+ other confirmers |
+| Trend alignment | Long: `ema_cross_pct > 0` & `mid_price > vwap`; Short: reverse |
+| Smart RSI | Skip long only if RSI14 > 75 **and** price > VWAP*1.005 **and** ATR falling |
+| Spread filter | Skip if `(spread / mid_price) > 0.015` |
+| Deep ITM expiry ban | Skip if delta > 0.95 on expiry day |
+| ORB gate (time‑bound) | Before 10:30: long only above ORB high, short only below ORB low. After 10:30: ignore ORB. |
+| Multi‑timeframe | 15‑min candle must agree (close > open for long) |
+| Signal decay | Cancel if signal older than 30 seconds |
+
+---
+
+## 5. Sizing, Execution, Profit Management
+
+- **Base risk:** 1% of account per trade.
+- **Scaling:** VIX, regime, day‑of‑week, time‑of‑day, consecutive‑loss reductions applied sequentially.
+- **Stop‑limit orders** with 1% limit, ATR‑based stops, GTT disaster stop.
+- **Partial exit** (50% at T1), trailing stop from 0.75R, hard time stop.
+
+---
+
+## 6. What About Range / Whipsaw Days? – The Full Answer
+
+Your system is a **pure momentum breakout strategy**.  
+Its edge exists *only* when the market is trending or delivering clean momentum bursts.  
+
+**On Range or Whipsaw days, the edge disappears completely.**  
+Forcing it to trade on those days is what caused the –₹4,068 loss.
+
+The new strategy therefore:
+
+- **Detects those days early** (by 10:15 AM) using ADX, Trend Persistence, and Breakout Success Rate.
+- **Shuts down for the session** (or trades at a tiny fraction of size if you insist).
+- **Preserves capital** for the next Trend day.
+
+This single change — knowing when to sit out — is the biggest single profit‑driver in the entire plan.
+
+If you later want to attack Range days, you’d build a **separate mean‑reversion module**, not try to force a momentum system to work where it can’t. But that’s entirely optional; many professional traders simply wait for the next trend.
+
+---
+
+## 7. Data – All Free, All Local
+
+- Raw candles from Upstox historical API (1‑min, 5‑min, 15‑min).
+- VWAP, ADX, ATR, EMA, RSI computed via `pandas-ta`.
+- Trend Persistence, Breakout Success Rate custom‑coded on top of those candles.
+- OI, Greeks, spread from Upstox API.
+
+---
+
+## 8. Implementation Phases
+
+**Phase 1 (Week 1–2):**  
+Regime detector, all entry filters, stop‑limit orders, 1% risk, partial exits, daily loss limit.
+
+**Phase 2 (Week 3–4):**  
+ATR stops, VIX/regime/time scaling, disaster stop, hard time stop.
+
+**Phase 3 (Week 5+):**  
+Enhance order‑flow proxy, log data for ML, weekly backtests. Add mean‑reversion module for Range days only if you have enough evidence it works.
+
+---
+
+## 9. Expected Outcome
+
+| Metric | Before | After |
+|--------|--------|-------|
+| Win rate | 39% | 43–50% |
+| Expectancy | +0.02R | **+0.25 – +0.35R** |
+| Max daily DD | –4.1% | –1.5% to –2% |
+| Monthly return | ~₹300 | **₹4,000 – ₹8,000** |
+
+---
+
+**This plan transforms a fragile one‑mode system into a context‑aware, capital‑preserving, consistently profitable strategy — using only the free data you already have.**

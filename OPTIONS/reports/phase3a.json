@@ -1,0 +1,42 @@
+{
+  "grade": "PASS",
+  "candidate_count": 61080,
+  "avg_score": 71.43750000000007,
+  "top_opportunities": [
+    {
+      "instrument": "NIFTY_2026-07-09_19950.0_CE",
+      "score": 73.31250000000009,
+      "rank": 1,
+      "confidence": 0.7331250000000009
+    },
+    {
+      "instrument": "NIFTY_2026-07-09_19950.0_CE",
+      "score": 73.31250000000009,
+      "rank": 1,
+      "confidence": 0.7331250000000009
+    },
+    {
+      "instrument": "NIFTY_2026-07-09_19950.0_CE",
+      "score": 73.31250000000009,
+      "rank": 1,
+      "confidence": 0.7331250000000009
+    },
+    {
+      "instrument": "NIFTY_2026-06-25_19950.0_CE",
+      "score": 73.31250000000009,
+      "rank": 1,
+      "confidence": 0.7331250000000009
+    },
+    {
+      "instrument": "NIFTY_2026-07-09_19950.0_CE",
+      "score": 73.31250000000009,
+      "rank": 1,
+      "confidence": 0.7331250000000009
+    }
+  ],
+  "confidence_distribution": {
+    "min": 0.6862500000000005,
+    "max": 0.7331250000000009,
+    "mean": 0.7143750000000008
+  }
+}

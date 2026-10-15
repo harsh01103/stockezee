@@ -1,0 +1,50 @@
+        hl = highs[i] - lows[i]
+        hc = abs(highs[i] - closes[i-1])
+        lc = abs(lows[i] - closes[i-1])
+        true_ranges.append(max(hl, hc, lc))
+    
+    if not true_ranges:
+        return None
+    
+    # Use last `period` candles (or all if fewer)
+    recent = true_ranges[-period:]
+    atr = sum(recent) / len(recent)
+    
+    # Floor at 0.5% of last LTP to prevent absurdly tight stops on stale data
+    last_ltp = float(closes[-1])
+    if last_ltp > 0:
+        atr = max(atr, last_ltp * 0.005)
+    
+    return round(atr, 2)
+
+
+def build_trade_idea(row, gen_dt, df_latest=None, df_raw=None):
+    """Convert a scored row into a slippage-aware trade idea dict."""
+    ltp = row.get("ltp", 0) or 0
+    bid = row.get("bid", 0) or 0
+    ask = row.get("ask", 0) or 0
+    underlying = row.get("underlying", "")
+    option_type = row.get("option_type", "")
+    
+    action = row.get("action", "BUY")
+    confidence = round(row.get("confidence", 0), 4)
+    spread = round(ask - bid, 2) if (bid > 0 and ask > 0) else 0
+    penalties = row.get("penalties", []) if isinstance(row.get("penalties", []), list) else []
+    dominant_feature = row.get("dominant_feature", "")
+    feature_contributions = row.get("feature_contributions", {})
+    
+    if action == "SELL":
+        return None
+        
+    # ── Pullback Limit Entry Pricing ─────────────────────────────
+    # Instead of chasing the peak of the breakout wick, we place a strict limit
+    # order slightly BELOW the current market price to force a pullback entry.
+    is_trending = row.get("is_trending")
+    if is_trending is None:
+        is_trending = reg_conf > 60 or momentum > 0.012
+        
+    # Demand a 0.5% pullback for momentum breakouts, or 0.25% for mean reversion
+    pullback_pct = 0.005 if is_trending else 0.0025
+    
+    base_price = ask if ask > 0 else (ltp if ltp > 0 else 0)
+    if base_price <= 0:

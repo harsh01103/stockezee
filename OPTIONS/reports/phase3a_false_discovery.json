@@ -1,0 +1,8 @@
+{
+  "grade": "FAIL",
+  "root_cause": "Score logic is entirely deterministic based on non-temporal static attributes (strikes).",
+  "dominant_feature": "c_signal",
+  "lift": 1.0,
+  "corrective_action": "Require actual temporal features (e.g. from real market data or dynamic synthetic generation) before placing capital at risk.",
+  "false_discovery_score": 0.85
+}
