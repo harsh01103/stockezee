@@ -111,9 +111,7 @@ class TokenStore:
             try:
                 with open(TOKEN_META_PATH, "r") as f:
                     data = json.load(f)
-                meta = TokenMeta(**data)
-                if meta.state == TokenState.VALID:
-                    return meta
+                return TokenMeta(**data)
             except Exception as e:
                 logger.warning(f"Could not parse token metadata: {e}")
                 

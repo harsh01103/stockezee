@@ -36,10 +36,13 @@ To guarantee that high-frequency algorithmic derivatives execution operates with
 3. **Regression Testing:** Verifies temporal execution truth ($t < t + \epsilon$), ensuring that zero look-ahead bias or autocorrelation leakage is introduced into historical data feeds.
 4. **Mutation Testing:** Injects deliberate synthetic faults (mutants) into risk gates, Kelly sizing, and spread thresholds using the `mutmut` / `cosmic-ray` harness to evaluate test suite kill rates.
 
-### 1.2 Visual Testing Execution Dashboard
-Below is the execution dashboard summarizing unit assertions, integration pass rates, coverage metrics, and mutation testing scores:
+### 1.2 Visual Testing Execution Dashboard & Screenshots
+Below is the execution dashboard screenshot summarizing the live automated test suite results across Integration Testing, Regression Testing, and Mutation Testing:
 
-![Integration, Regression & Mutation Testing Dashboard](report_images/integration_testing_dashboard.svg)
+![Comprehensive Testing Execution Screenshot](report_images/review3_testing_execution_screenshot.png)
+
+*High-Resolution Vector Dashboard:*
+![Integration, Regression & Mutation Testing Vector Dashboard](report_images/review3_testing_execution_screenshot.svg)
 
 ### 1.3 Detailed Test Suite Implementations & Execution Assertions
 
