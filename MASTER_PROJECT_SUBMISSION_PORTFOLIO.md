@@ -476,9 +476,10 @@ stateDiagram-v2
 ---
 
 ### APPENDIX E: CODE LISTING & GITHUB REPOSITORY MAPPING
-- **Primary GitHub Repository:** `https://github.com/StockStudy/HighFrequencyOptionsEngine`
-- **Frontend Monorepo Mirror:** `https://github.com/StockStudy/stock-study-monorepo`
-- **Production Web Deployment:** `https://stock-study-monorepo.vercel.app`
+- **Primary GitHub Repository:** `https://github.com/harsh01103/stockezee`
+- **Owner / Account:** `harsh01103` (Harsh Vardhan Ajmera)
+- **Repository Name:** `stockezee`
+- **Default Production Branch:** `main`
 - **License:** MIT Academic Open Source License
 
 ---
