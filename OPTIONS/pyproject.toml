@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stockezee-options-engine"
+version = "4.5.1"
+authors = [
+  { name="Harsh Vardhan Ajmera", email="hajmera011@gmail.com" },
+]
+description = "High-Frequency Options Microstructure, LLVM Greeks & ML Execution Engine"
+readme = "ARCHITECTURE.md"
+requires-python = ">=3.10"
+dependencies = [
+    "polars>=0.20.0",
+    "pyarrow>=14.0.0",
+    "numba>=0.58.0",
+    "numpy>=1.24.0",
+    "cryptography>=41.0.0",
+    "protobuf>=4.25.0",
+    "pydantic>=2.0.0",
+    "loguru>=0.7.0"
+]

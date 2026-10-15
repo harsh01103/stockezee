@@ -48,6 +48,10 @@ ENV/
 .coverage
 htmlcov/
 .ipynb_checkpoints/
+*.egg-info/
+*.egg
+build/
+dist/
 
 # 5. R Workspace & History
 .Rproj.user/
